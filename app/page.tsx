@@ -166,7 +166,9 @@ export default function Home() {
 
         </div>
       </section>
-{/* EMAIL SIGNUP */}
+
+  
+     {/* EMAIL SIGNUP */}
 <section className="py-24 px-6">
   <div className="max-w-3xl mx-auto text-center bg-white/5 border border-white/10 rounded-3xl p-10">
 
@@ -178,12 +180,35 @@ export default function Home() {
       Get digital marketing tips, SEO insights, and exclusive updates from BrandPilot.
     </p>
 
-    <form className="mt-8 flex flex-col md:flex-row gap-4">
+    <form
+      action="https://gmail.us6.list-manage.com/subscribe/post?u=bd4cd98e814440d55a3cc4a9a&id=e0668f3b02&f_id=00fe8ae5f0"
+      method="POST"
+      target="_blank"
+      className="mt-8 flex flex-col md:flex-row gap-4"
+    >
       <input
         type="email"
+        name="EMAIL"
         placeholder="Enter your email"
+        required
         className="flex-1 p-4 rounded-xl bg-black/40 border border-white/10 text-white outline-none"
       />
+
+      {/* Hidden field to block bots */}
+      <div
+        style={{
+          position: "absolute",
+          left: "-5000px",
+        }}
+        aria-hidden="true"
+      >
+        <input
+          type="text"
+          name="b_bd4cd98e814440d55a3cc4a9a_e0668f3b02"
+          tabIndex={-1}
+          defaultValue=""
+        />
+      </div>
 
       <button
         type="submit"
