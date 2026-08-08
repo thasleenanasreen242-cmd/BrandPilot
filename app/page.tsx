@@ -449,12 +449,16 @@ export default function Home() {
   </p>
 
   <h1 className="gradient-text text-4xl md:text-7xl font-black mt-8 leading-tight">
-    AI-Powered Web Design
+    Helping Brands
     <br />
-    & Digital Marketing Agency
+    Take Off.
   </h1>
 
-  <p className="text-gray-400 mt-8 max-w-2xl text-xl leading-9">
+  <p className="text-blue-300 text-xl md:text-2xl font-semibold mt-5">
+    AI-Powered Web Design &amp; Digital Marketing Agency
+  </p>
+
+  <p className="text-gray-400 mt-6 max-w-2xl text-xl leading-9">
     BrandPilot helps businesses grow online with custom website design,
     responsive web development, SEO, branding, social media marketing,
     Google Ads, Meta Ads, email marketing, and AI-powered digital
