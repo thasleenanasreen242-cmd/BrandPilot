@@ -454,7 +454,7 @@ export default function Home() {
     Take Off.
   </h1>
 
-  <p className="text-blue-300 text-xl md:text-2xl font-semibold mt-5">
+  <p className="text-gray-400 text-lg md:text-xl font-medium mt-3 tracking-wide">
     AI-Powered Web Design &amp; Digital Marketing Agency
   </p>
 
