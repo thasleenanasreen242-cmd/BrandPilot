@@ -61,6 +61,67 @@ type AuditResponse = {
   };
 };
 
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function getWebsiteName(
+  hostname: string,
+  pageTitle?: string
+) {
+  /*
+   * First try to use the actual website title.
+   * Example:
+   * "SensCore Technologies | Engineering Solutions"
+   * becomes:
+   * "SensCore Technologies"
+   */
+
+  if (pageTitle) {
+    const cleanedTitle = pageTitle
+      .split("|")[0]
+      .split("•")[0]
+      .split(" - ")[0]
+      .trim();
+
+    if (
+      cleanedTitle &&
+      cleanedTitle.length >= 2 &&
+      cleanedTitle.length <= 60
+    ) {
+      return cleanedTitle;
+    }
+  }
+
+  /*
+   * Fallback to the domain.
+   *
+   * senscoretech.com
+   * becomes:
+   * Senscoretech
+   */
+
+  const domain = hostname
+    .replace(/^www\./i, "")
+    .split(".")[0]
+    .replace(/[-_]+/g, " ")
+    .trim();
+
+  if (!domain) {
+    return "Website";
+  }
+
+  return domain
+    .split(" ")
+    .filter(Boolean)
+    .map(
+      (word) =>
+        word.charAt(0).toUpperCase() +
+        word.slice(1)
+    )
+    .join(" ");
+}
+
 function getScoreText(score: number) {
   if (score >= 90) return "Excellent";
   if (score >= 75) return "Good";
@@ -72,6 +133,7 @@ function getScoreColor(score: number) {
   if (score >= 90) return "text-emerald-400";
   if (score >= 75) return "text-cyan-400";
   if (score >= 60) return "text-yellow-400";
+
   return "text-red-400";
 }
 
@@ -87,13 +149,20 @@ function getPriorityClass(priority?: string) {
   return "border-blue-500/20 bg-blue-500/10 text-blue-300";
 }
 
+/* =========================================================
+   MAIN PAGE
+========================================================= */
+
 export default function AIAuditPage() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<AuditResponse | null>(null);
+  const [result, setResult] =
+    useState<AuditResponse | null>(null);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     setError("");
@@ -133,11 +202,13 @@ export default function AIAuditPage() {
         }),
       });
 
-      const data: AuditResponse = await response.json();
+      const data: AuditResponse =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Unable to complete the website audit."
+          data.error ||
+            "Unable to complete the website audit."
         );
       }
 
@@ -165,6 +236,7 @@ export default function AIAuditPage() {
   function startNewAudit() {
     setResult(null);
     setError("");
+
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -201,7 +273,7 @@ export default function AIAuditPage() {
 }
 
 /* =========================================================
-   LANDING PAGE
+   LANDING
 ========================================================= */
 
 function Landing({
@@ -215,7 +287,9 @@ function Landing({
   setUrl: (value: string) => void;
   loading: boolean;
   error: string;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (
+    event: FormEvent<HTMLFormElement>
+  ) => void;
 }) {
   return (
     <section>
@@ -232,9 +306,10 @@ function Landing({
         </h1>
 
         <p className="mx-auto mt-7 max-w-3xl text-base leading-8 text-slate-400 sm:text-lg">
-          Get an AI-powered analysis of your website&apos;s SEO,
-          performance, content, branding and technical health — with
-          practical recommendations from BrandPilot AI.
+          Get an AI-powered analysis of your website&apos;s
+          SEO, performance, content, branding and technical
+          health — with practical recommendations from
+          BrandPilot AI.
         </p>
       </div>
 
@@ -255,7 +330,9 @@ function Landing({
                   id="website"
                   type="text"
                   value={url}
-                  onChange={(event) => setUrl(event.target.value)}
+                  onChange={(event) =>
+                    setUrl(event.target.value)
+                  }
                   placeholder="https://yourwebsite.com"
                   disabled={loading}
                   className="h-14 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 disabled:opacity-60"
@@ -266,7 +343,9 @@ function Landing({
                   disabled={loading}
                   className="h-14 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-7 font-semibold text-white shadow-lg shadow-blue-900/20 transition hover:from-blue-500 hover:to-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {loading ? "Analyzing..." : "Analyze Website →"}
+                  {loading
+                    ? "Analyzing..."
+                    : "Analyze Website →"}
                 </button>
               </div>
 
@@ -276,8 +355,8 @@ function Landing({
                     <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-cyan-400" />
 
                     <span>
-                      BrandPilot is analyzing your website. This may take a
-                      few seconds...
+                      BrandPilot is analyzing your website.
+                      This may take a few seconds...
                     </span>
                   </div>
                 </div>
@@ -285,7 +364,9 @@ function Landing({
 
               {error && (
                 <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
-                  <strong className="font-semibold">Audit failed:</strong>{" "}
+                  <strong className="font-semibold">
+                    Audit failed:
+                  </strong>{" "}
                   {error}
                 </div>
               )}
@@ -298,7 +379,7 @@ function Landing({
         </div>
       </div>
 
-      {/* What we analyze */}
+      {/* Features */}
       <div className="mx-auto mt-20 max-w-6xl">
         <div className="text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">
@@ -367,7 +448,9 @@ function AuditCard({
         {symbol}
       </div>
 
-      <h3 className="mt-5 text-lg font-semibold">{title}</h3>
+      <h3 className="mt-5 text-lg font-semibold">
+        {title}
+      </h3>
 
       <p className="mt-2 text-sm leading-6 text-slate-400">
         {description}
@@ -413,6 +496,11 @@ function Results({
     );
   }
 
+  const websiteName = getWebsiteName(
+    website.hostname,
+    audit.title
+  );
+
   const checks = [
     ["HTTPS", audit.https],
     ["Page title", Boolean(audit.title)],
@@ -424,7 +512,9 @@ function Results({
     ["Sitemap", audit.sitemap],
   ] as const;
 
-  const passed = checks.filter((item) => item[1]).length;
+  const passed = checks.filter(
+    (item) => item[1]
+  ).length;
 
   return (
     <section id="audit-results">
@@ -436,7 +526,7 @@ function Results({
           </div>
 
           <h1 className="text-3xl font-bold sm:text-5xl">
-            Website Audit Report
+            {websiteName} Audit Report
           </h1>
 
           <p className="mt-3 break-all text-sm text-slate-400">
@@ -452,7 +542,7 @@ function Results({
         </button>
       </div>
 
-      {/* Overall + Scores */}
+      {/* Score */}
       <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_2fr]">
         <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-600/15 via-white/[0.03] to-cyan-500/10 p-8">
           <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
@@ -462,7 +552,10 @@ function Results({
               Overall Website Score
             </p>
 
-            <ScoreCircle score={scores.overall} large />
+            <ScoreCircle
+              score={scores.overall}
+              large
+            />
 
             <h2
               className={`mt-5 text-2xl font-bold ${getScoreColor(
@@ -472,18 +565,38 @@ function Results({
               {getScoreText(scores.overall)}
             </h2>
 
+            {/* DYNAMIC WEBSITE NAME */}
             <p className="mt-2 text-sm text-slate-500">
-              BrandPilot website health score
+              {websiteName} Website Health Score
             </p>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <ScoreCard title="SEO" score={scores.seo} />
-          <ScoreCard title="Performance" score={scores.performance} />
-          <ScoreCard title="Content" score={scores.content} />
-          <ScoreCard title="Brand" score={scores.brand} />
-          <ScoreCard title="Technical" score={scores.technical} />
+          <ScoreCard
+            title="SEO"
+            score={scores.seo}
+          />
+
+          <ScoreCard
+            title="Performance"
+            score={scores.performance}
+          />
+
+          <ScoreCard
+            title="Content"
+            score={scores.content}
+          />
+
+          <ScoreCard
+            title="Brand"
+            score={scores.brand}
+          />
+
+          <ScoreCard
+            title="Technical"
+            score={scores.technical}
+          />
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
             <p className="text-xs uppercase tracking-wide text-slate-500">
@@ -492,7 +605,8 @@ function Results({
 
             <p
               className={`mt-4 text-3xl font-bold ${
-                website.status >= 200 && website.status < 400
+                website.status >= 200 &&
+                website.status < 400
                   ? "text-emerald-400"
                   : "text-red-400"
               }`}
@@ -511,13 +625,17 @@ function Results({
       <div className="mt-12">
         <SectionHeading
           eyebrow="Website Signals"
-          title="Key audit metrics"
+          title="Key Audit Metrics"
         />
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Metric
             label="Page Title"
-            value={audit.title ? "Present" : "Missing"}
+            value={
+              audit.title
+                ? "Present"
+                : "Missing"
+            }
             good={Boolean(audit.title)}
           />
 
@@ -587,58 +705,70 @@ function Results({
 
           <Metric
             label="Canonical"
-            value={audit.canonical ? "Found" : "Missing"}
+            value={
+              audit.canonical
+                ? "Found"
+                : "Missing"
+            }
             good={audit.canonical}
           />
 
           <Metric
             label="Sitemap"
-            value={audit.sitemap ? "Found" : "Missing"}
+            value={
+              audit.sitemap
+                ? "Found"
+                : "Missing"
+            }
             good={audit.sitemap}
           />
         </div>
       </div>
 
-      {/* Technical Checks */}
+      {/* Technical */}
       <div className="mt-12">
         <SectionHeading
           eyebrow="Technical Health"
-          title={`${passed}/${checks.length} checks passed`}
+          title={`${passed}/${checks.length} Checks Passed`}
         />
 
         <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]">
-          {checks.map(([name, isGood]) => (
-            <div
-              key={name}
-              className="flex items-center justify-between border-b border-white/5 px-5 py-4 last:border-0"
-            >
-              <div className="flex items-center gap-3">
+          {checks.map(
+            ([name, isGood]) => (
+              <div
+                key={name}
+                className="flex items-center justify-between border-b border-white/5 px-5 py-4 last:border-0"
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className={
+                      isGood
+                        ? "text-emerald-400"
+                        : "text-red-400"
+                    }
+                  >
+                    {isGood ? "✓" : "×"}
+                  </span>
+
+                  <span className="text-sm text-slate-200">
+                    {name}
+                  </span>
+                </div>
+
                 <span
                   className={
                     isGood
-                      ? "text-emerald-400"
-                      : "text-red-400"
+                      ? "text-xs font-medium text-emerald-400"
+                      : "text-xs font-medium text-red-400"
                   }
                 >
-                  {isGood ? "✓" : "×"}
-                </span>
-
-                <span className="text-sm text-slate-200">
-                  {name}
+                  {isGood
+                    ? "Passed"
+                    : "Needs attention"}
                 </span>
               </div>
-
-              <span
-                className={
-                  isGood
-                    ? "text-xs font-medium text-emerald-400"
-                    : "text-xs font-medium text-red-400"
-                }
-              >
-                {isGood ? "Passed" : "Needs attention"}
-              </span>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </div>
 
@@ -672,20 +802,25 @@ function Results({
             {ai?.recommendations &&
             ai.recommendations.length > 0 ? (
               ai.recommendations.map(
-                (recommendation, index) => (
+                (
+                  recommendation,
+                  index
+                ) => (
                   <Recommendation
                     key={`${recommendation.title}-${index}`}
                     number={index + 1}
-                    recommendation={recommendation}
+                    recommendation={
+                      recommendation
+                    }
                   />
                 )
               )
             ) : (
               <div className="p-8 text-sm leading-7 text-slate-400">
-                The technical audit completed successfully.
-                AI recommendations are currently unavailable.
-                Check that your Gemini API key is configured in
-                Vercel.
+                The technical audit completed
+                successfully. AI recommendations are
+                currently unavailable. Check that your
+                Gemini API key is configured in Vercel.
               </div>
             )}
           </div>
@@ -694,15 +829,18 @@ function Results({
 
       {/* CTA */}
       <div className="mt-12 rounded-3xl border border-blue-500/20 bg-gradient-to-r from-blue-600/15 via-blue-500/10 to-cyan-500/10 p-8 text-center sm:p-12">
-        <div className="text-3xl">✦</div>
+        <div className="text-3xl">
+          ✦
+        </div>
 
         <h2 className="mt-5 text-2xl font-bold sm:text-3xl">
           Ready to improve your website?
         </h2>
 
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-400">
-          Turn your audit insights into a stronger digital presence,
-          better visibility and more opportunities.
+          Turn your audit insights into a stronger
+          digital presence, better visibility and more
+          opportunities.
         </p>
 
         <a
@@ -717,7 +855,7 @@ function Results({
 }
 
 /* =========================================================
-   SCORE COMPONENTS
+   SCORE CIRCLE
 ========================================================= */
 
 function ScoreCircle({
@@ -728,9 +866,19 @@ function ScoreCircle({
   large?: boolean;
 }) {
   const radius = 52;
-  const circumference = 2 * Math.PI * radius;
+
+  const circumference =
+    2 * Math.PI * radius;
+
+  const safeScore = Math.max(
+    0,
+    Math.min(100, score)
+  );
+
   const offset =
-    circumference - (score / 100) * circumference;
+    circumference -
+    (safeScore / 100) *
+      circumference;
 
   const size = large ? 180 : 92;
 
@@ -777,8 +925,15 @@ function ScoreCircle({
             x2="100%"
             y2="100%"
           >
-            <stop offset="0%" stopColor="#2563eb" />
-            <stop offset="100%" stopColor="#22d3ee" />
+            <stop
+              offset="0%"
+              stopColor="#2563eb"
+            />
+
+            <stop
+              offset="100%"
+              stopColor="#22d3ee"
+            />
           </linearGradient>
         </defs>
       </svg>
@@ -802,6 +957,10 @@ function ScoreCircle({
   );
 }
 
+/* =========================================================
+   SCORE CARD
+========================================================= */
+
 function ScoreCard({
   title,
   score,
@@ -812,10 +971,14 @@ function ScoreCard({
   return (
     <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.035] p-5">
       <div>
-        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-sm font-semibold">
+          {title}
+        </p>
 
         <p
-          className={`mt-1 text-xs ${getScoreColor(score)}`}
+          className={`mt-1 text-xs ${getScoreColor(
+            score
+          )}`}
         >
           {getScoreText(score)}
         </p>
@@ -823,6 +986,7 @@ function ScoreCard({
 
       <div className="text-2xl font-bold">
         {score}
+
         <span className="text-xs text-slate-600">
           /100
         </span>
@@ -830,6 +994,10 @@ function ScoreCard({
     </div>
   );
 }
+
+/* =========================================================
+   METRIC
+========================================================= */
 
 function Metric({
   label,
@@ -865,6 +1033,10 @@ function Metric({
   );
 }
 
+/* =========================================================
+   SECTION HEADING
+========================================================= */
+
 function SectionHeading({
   eyebrow,
   title,
@@ -884,6 +1056,10 @@ function SectionHeading({
     </div>
   );
 }
+
+/* =========================================================
+   RECOMMENDATION
+========================================================= */
 
 function Recommendation({
   number,
@@ -906,7 +1082,8 @@ function Recommendation({
                 recommendation.priority
               )}`}
             >
-              {recommendation.priority || "low"}
+              {recommendation.priority ||
+                "low"}
             </span>
 
             {recommendation.category && (
