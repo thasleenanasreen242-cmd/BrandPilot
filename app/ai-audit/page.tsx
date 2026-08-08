@@ -1,31 +1,25 @@
 "use client";
 
-import {
-  AlertCircle,
-  ArrowRight,
-  BarChart3,
-  CheckCircle2,
-  Gauge,
-  Globe2,
-  Loader2,
-  Search,
-  ShieldCheck,
-  Sparkles,
-  Target,
-  TrendingUp,
-  XCircle,
-  Zap,
-} from "lucide-react";
 import { FormEvent, useState } from "react";
 
-type AuditResult = {
-  success: boolean;
-  website: {
+type Recommendation = {
+  priority?: "high" | "medium" | "low";
+  category?: string;
+  title?: string;
+  description?: string;
+};
+
+type AuditResponse = {
+  success?: boolean;
+  error?: string;
+
+  website?: {
     url: string;
     hostname: string;
     status: number;
   };
-  scores: {
+
+  scores?: {
     overall: number;
     seo: number;
     performance: number;
@@ -33,72 +27,84 @@ type AuditResult = {
     brand: number;
     technical: number;
   };
-  audit: {
+
+  audit?: {
+    url: string;
+    hostname: string;
+    status: number;
+    https: boolean;
+
     title: string;
     titleLength: number;
+
     description: string;
     descriptionLength: number;
+
     h1: number;
     h2: number;
+
     images: number;
     imagesMissingAlt: number;
+
     links: number;
     wordCount: number;
+
     canonical: boolean;
     viewport: boolean;
     robots: boolean;
     sitemap: boolean;
-    https: boolean;
-    status: number;
   };
-  ai: {
+
+  ai?: {
     summary?: string;
-    recommendations?: {
-      priority: "high" | "medium" | "low";
-      category: string;
-      title: string;
-      description: string;
-    }[];
+    recommendations?: Recommendation[];
   };
 };
 
-function scoreLabel(score: number) {
+function getScoreText(score: number) {
   if (score >= 90) return "Excellent";
   if (score >= 75) return "Good";
   if (score >= 60) return "Needs Improvement";
   return "Critical";
 }
 
-function scoreRing(score: number) {
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  const progress = circumference - (score / 100) * circumference;
+function getScoreColor(score: number) {
+  if (score >= 90) return "text-emerald-400";
+  if (score >= 75) return "text-cyan-400";
+  if (score >= 60) return "text-yellow-400";
+  return "text-red-400";
+}
 
-  return {
-    radius,
-    circumference,
-    progress,
-  };
+function getPriorityClass(priority?: string) {
+  if (priority === "high") {
+    return "border-red-500/20 bg-red-500/10 text-red-300";
+  }
+
+  if (priority === "medium") {
+    return "border-yellow-500/20 bg-yellow-500/10 text-yellow-300";
+  }
+
+  return "border-blue-500/20 bg-blue-500/10 text-blue-300";
 }
 
 export default function AIAuditPage() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<AuditResult | null>(null);
+  const [result, setResult] = useState<AuditResponse | null>(null);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
     setError("");
     setResult(null);
 
-    if (!url.trim()) {
+    let websiteUrl = url.trim();
+
+    if (!websiteUrl) {
       setError("Please enter your website URL.");
       return;
     }
-
-    let websiteUrl = url.trim();
 
     if (
       !websiteUrl.startsWith("http://") &&
@@ -127,46 +133,56 @@ export default function AIAuditPage() {
         }),
       });
 
-      const data = await response.json();
+      const data: AuditResponse = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data?.error || "Unable to complete the website audit."
+          data.error || "Unable to complete the website audit."
         );
       }
 
       setResult(data);
+
+      setTimeout(() => {
+        document
+          .getElementById("audit-results")
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+      }, 100);
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "Unable to complete the website audit."
+          : "Something went wrong while auditing the website."
       );
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const resetAudit = () => {
+  function startNewAudit() {
     setResult(null);
     setError("");
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-  };
+  }
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#050b14] text-white">
       {/* Background */}
-      <div className="pointer-events-none fixed inset-0 -z-0">
+      <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/2 top-[-300px] h-[650px] w-[650px] -translate-x-1/2 rounded-full bg-blue-600/10 blur-[140px]" />
-        <div className="absolute bottom-[-300px] right-[-200px] h-[550px] w-[550px] rounded-full bg-cyan-500/10 blur-[140px]" />
+
+        <div className="absolute bottom-[-250px] right-[-200px] h-[550px] w-[550px] rounded-full bg-cyan-500/10 blur-[140px]" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
+      <div className="relative mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10 lg:py-24">
         {!result ? (
-          <AuditLanding
+          <Landing
             url={url}
             setUrl={setUrl}
             loading={loading}
@@ -174,14 +190,21 @@ export default function AIAuditPage() {
             onSubmit={handleSubmit}
           />
         ) : (
-          <AuditResults result={result} onReset={resetAudit} />
+          <Results
+            result={result}
+            onNewAudit={startNewAudit}
+          />
         )}
       </div>
     </main>
   );
 }
 
-function AuditLanding({
+/* =========================================================
+   LANDING PAGE
+========================================================= */
+
+function Landing({
   url,
   setUrl,
   loading,
@@ -192,15 +215,13 @@ function AuditLanding({
   setUrl: (value: string) => void;
   loading: boolean;
   error: string;
-  onSubmit: (e: FormEvent) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <>
-      {/* Hero */}
-      <section className="mx-auto max-w-5xl text-center">
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-300">
-          <Sparkles className="h-4 w-4" />
-          AI-Powered Website Audit
+    <section>
+      <div className="mx-auto max-w-5xl text-center">
+        <div className="mb-6 inline-flex items-center rounded-full border border-blue-400/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-300">
+          ✦ AI-Powered Website Audit
         </div>
 
         <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
@@ -211,78 +232,76 @@ function AuditLanding({
         </h1>
 
         <p className="mx-auto mt-7 max-w-3xl text-base leading-8 text-slate-400 sm:text-lg">
-          Get an AI-powered analysis of your website's SEO, performance,
-          content, branding and technical health — with actionable
-          recommendations from BrandPilot AI.
+          Get an AI-powered analysis of your website&apos;s SEO,
+          performance, content, branding and technical health — with
+          practical recommendations from BrandPilot AI.
         </p>
-      </section>
+      </div>
 
       {/* Form */}
-      <section className="mx-auto mt-12 max-w-3xl">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-2 shadow-2xl shadow-blue-950/20 backdrop-blur-xl">
-          <form
-            onSubmit={onSubmit}
-            className="rounded-2xl border border-white/5 bg-[#07101d]/90 p-5 sm:p-7"
-          >
-            <label
-              htmlFor="website"
-              className="mb-3 block text-sm font-medium text-slate-300"
-            >
-              Enter your website URL
-            </label>
+      <div className="mx-auto mt-12 max-w-3xl">
+        <div className="rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-600/10 via-white/[0.03] to-cyan-500/10 p-[1px] shadow-2xl shadow-blue-950/30">
+          <div className="rounded-3xl bg-[#07101d]/95 p-6 sm:p-8">
+            <form onSubmit={onSubmit}>
+              <label
+                htmlFor="website"
+                className="mb-3 block text-sm font-medium text-slate-300"
+              >
+                Enter your website URL
+              </label>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <div className="relative flex-1">
-                <Globe2 className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
-
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   id="website"
                   type="text"
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
+                  onChange={(event) => setUrl(event.target.value)}
                   placeholder="https://yourwebsite.com"
                   disabled={loading}
-                  className="h-14 w-full rounded-xl border border-white/10 bg-black/30 pl-12 pr-4 text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 disabled:opacity-60"
+                  className="h-14 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/10 disabled:opacity-60"
                 />
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="h-14 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-7 font-semibold text-white shadow-lg shadow-blue-900/20 transition hover:from-blue-500 hover:to-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading ? "Analyzing..." : "Analyze Website →"}
+                </button>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex h-14 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-7 font-semibold text-white shadow-lg shadow-blue-900/20 transition hover:from-blue-500 hover:to-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    Analyze Website
-                    <ArrowRight className="h-5 w-5" />
-                  </>
-                )}
-              </button>
-            </div>
+              {loading && (
+                <div className="mt-5 rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 text-sm text-blue-300">
+                  <div className="flex items-center gap-3">
+                    <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-cyan-400" />
 
-            {error && (
-              <div className="mt-4 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
-                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
+                    <span>
+                      BrandPilot is analyzing your website. This may take a
+                      few seconds...
+                    </span>
+                  </div>
+                </div>
+              )}
 
-            <p className="mt-4 text-xs text-slate-500">
-              Free website analysis • No credit card required
-            </p>
-          </form>
+              {error && (
+                <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
+                  <strong className="font-semibold">Audit failed:</strong>{" "}
+                  {error}
+                </div>
+              )}
+
+              <p className="mt-4 text-xs text-slate-500">
+                Free website analysis • No credit card required
+              </p>
+            </form>
+          </div>
         </div>
-      </section>
+      </div>
 
-      {/* Categories */}
-      <section className="mx-auto mt-20 max-w-6xl">
-        <div className="mb-8 text-center">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-blue-400">
+      {/* What we analyze */}
+      <div className="mx-auto mt-20 max-w-6xl">
+        <div className="text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">
             What We Analyze
           </p>
 
@@ -291,64 +310,64 @@ function AuditLanding({
           </h2>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <AuditCard
-            icon={<Search />}
+            symbol="⌕"
             title="SEO"
-            description="Meta tags, headings, search visibility and on-page SEO signals."
+            description="Titles, meta descriptions, headings, canonical tags, robots and sitemap signals."
           />
 
           <AuditCard
-            icon={<Zap />}
+            symbol="⚡"
             title="Performance"
-            description="Technical signals and website factors that can affect user experience."
+            description="Website structure and resource signals that can influence user experience."
           />
 
           <AuditCard
-            icon={<BarChart3 />}
+            symbol="▤"
             title="Content"
-            description="Content structure, page depth and optimization opportunities."
+            description="Content depth, headings, links and page structure."
           />
 
           <AuditCard
-            icon={<Target />}
+            symbol="◆"
             title="Brand"
-            description="Messaging, positioning and digital brand presence."
+            description="Messaging and important on-page brand signals."
           />
 
           <AuditCard
-            icon={<ShieldCheck />}
+            symbol="✓"
             title="Technical"
-            description="HTTPS, viewport, sitemap, robots and other technical checks."
+            description="HTTPS, viewport, HTTP status and other technical checks."
           />
 
           <AuditCard
-            icon={<Sparkles />}
+            symbol="✦"
             title="AI Recommendations"
-            description="Actionable recommendations generated from your website data."
+            description="Actionable recommendations generated from your real audit data."
           />
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
 
 function AuditCard({
-  icon,
+  symbol,
   title,
   description,
 }: {
-  icon: React.ReactNode;
+  symbol: string;
   title: string;
   description: string;
 }) {
   return (
     <div className="group rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition hover:-translate-y-1 hover:border-blue-500/30 hover:bg-blue-500/[0.04]">
-      <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-400/10 text-blue-300">
-        {icon}
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-400/10 text-xl text-blue-300">
+        {symbol}
       </div>
 
-      <h3 className="text-lg font-semibold">{title}</h3>
+      <h3 className="mt-5 text-lg font-semibold">{title}</h3>
 
       <p className="mt-2 text-sm leading-6 text-slate-400">
         {description}
@@ -357,155 +376,131 @@ function AuditCard({
   );
 }
 
-function AuditResults({
+/* =========================================================
+   RESULTS
+========================================================= */
+
+function Results({
   result,
-  onReset,
+  onNewAudit,
 }: {
-  result: AuditResult;
-  onReset: () => void;
+  result: AuditResponse;
+  onNewAudit: () => void;
 }) {
-  const { scores, audit, website, ai } = result;
+  const scores = result.scores;
+  const audit = result.audit;
+  const website = result.website;
+  const ai = result.ai;
+
+  if (!scores || !audit || !website) {
+    return (
+      <div className="mx-auto max-w-3xl rounded-3xl border border-red-500/20 bg-red-500/10 p-8 text-center">
+        <h1 className="text-2xl font-bold">
+          Incomplete audit response
+        </h1>
+
+        <p className="mt-3 text-slate-400">
+          The audit backend returned an incomplete result.
+        </p>
+
+        <button
+          onClick={onNewAudit}
+          className="mt-6 rounded-xl bg-blue-600 px-6 py-3 font-semibold"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   const checks = [
-    {
-      name: "HTTPS enabled",
-      passed: audit.https,
-    },
-    {
-      name: "Page title",
-      passed: Boolean(audit.title),
-    },
-    {
-      name: "Meta description",
-      passed: Boolean(audit.description),
-    },
-    {
-      name: "H1 heading",
-      passed: audit.h1 === 1,
-    },
-    {
-      name: "Canonical URL",
-      passed: audit.canonical,
-    },
-    {
-      name: "Viewport configuration",
-      passed: audit.viewport,
-    },
-    {
-      name: "Robots configuration",
-      passed: audit.robots,
-    },
-    {
-      name: "XML sitemap",
-      passed: audit.sitemap,
-    },
-  ];
+    ["HTTPS", audit.https],
+    ["Page title", Boolean(audit.title)],
+    ["Meta description", Boolean(audit.description)],
+    ["Single H1", audit.h1 === 1],
+    ["Canonical", audit.canonical],
+    ["Viewport", audit.viewport],
+    ["Robots", audit.robots],
+    ["Sitemap", audit.sitemap],
+  ] as const;
 
-  const passedChecks = checks.filter((check) => check.passed).length;
+  const passed = checks.filter((item) => item[1]).length;
 
   return (
-    <section>
-      {/* Results Header */}
+    <section id="audit-results">
+      {/* Header */}
       <div className="flex flex-col gap-6 border-b border-white/10 pb-10 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300">
-            <CheckCircle2 className="h-4 w-4" />
-            Audit completed
+          <div className="mb-4 inline-flex items-center rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300">
+            ✓ Audit completed
           </div>
 
           <h1 className="text-3xl font-bold sm:text-5xl">
             Website Audit Report
           </h1>
 
-          <p className="mt-3 flex items-center gap-2 break-all text-sm text-slate-400">
-            <Globe2 className="h-4 w-4 shrink-0" />
+          <p className="mt-3 break-all text-sm text-slate-400">
             {website.url}
           </p>
         </div>
 
         <button
-          onClick={onReset}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-medium text-slate-200 transition hover:border-blue-500/30 hover:bg-white/[0.07]"
+          onClick={onNewAudit}
+          className="rounded-xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold transition hover:border-blue-500/30 hover:bg-white/[0.07]"
         >
-          <Search className="h-4 w-4" />
-          Audit another website
+          ← Audit Another Website
         </button>
       </div>
 
-      {/* Overall Score */}
+      {/* Overall + Scores */}
       <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_2fr]">
-        <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-600/10 via-white/[0.03] to-cyan-500/5 p-8">
+        <div className="relative overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-600/15 via-white/[0.03] to-cyan-500/10 p-8">
           <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
 
-          <div className="relative">
-            <p className="text-sm font-medium text-slate-400">
+          <div className="relative text-center">
+            <p className="text-sm text-slate-400">
               Overall Website Score
             </p>
 
-            <div className="mt-8 flex justify-center">
-              <ScoreCircle score={scores.overall} large />
-            </div>
+            <ScoreCircle score={scores.overall} large />
 
-            <div className="mt-6 text-center">
-              <p className="text-2xl font-bold">
-                {scoreLabel(scores.overall)}
-              </p>
+            <h2
+              className={`mt-5 text-2xl font-bold ${getScoreColor(
+                scores.overall
+              )}`}
+            >
+              {getScoreText(scores.overall)}
+            </h2>
 
-              <p className="mt-2 text-sm text-slate-400">
-                Based on BrandPilot's website audit signals
-              </p>
-            </div>
+            <p className="mt-2 text-sm text-slate-500">
+              BrandPilot website health score
+            </p>
           </div>
         </div>
 
-        {/* Score Grid */}
         <div className="grid gap-4 sm:grid-cols-2">
-          <ScoreCard
-            icon={<Search />}
-            title="SEO"
-            score={scores.seo}
-          />
-
-          <ScoreCard
-            icon={<Gauge />}
-            title="Performance"
-            score={scores.performance}
-          />
-
-          <ScoreCard
-            icon={<TrendingUp />}
-            title="Content"
-            score={scores.content}
-          />
-
-          <ScoreCard
-            icon={<Target />}
-            title="Brand"
-            score={scores.brand}
-          />
-
-          <ScoreCard
-            icon={<ShieldCheck />}
-            title="Technical"
-            score={scores.technical}
-          />
+          <ScoreCard title="SEO" score={scores.seo} />
+          <ScoreCard title="Performance" score={scores.performance} />
+          <ScoreCard title="Content" score={scores.content} />
+          <ScoreCard title="Brand" score={scores.brand} />
+          <ScoreCard title="Technical" score={scores.technical} />
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
-            <p className="text-sm text-slate-400">HTTP Status</p>
+            <p className="text-xs uppercase tracking-wide text-slate-500">
+              HTTP Status
+            </p>
 
-            <div className="mt-5 flex items-center gap-3">
-              {website.status >= 200 && website.status < 400 ? (
-                <CheckCircle2 className="h-7 w-7 text-emerald-400" />
-              ) : (
-                <XCircle className="h-7 w-7 text-red-400" />
-              )}
+            <p
+              className={`mt-4 text-3xl font-bold ${
+                website.status >= 200 && website.status < 400
+                  ? "text-emerald-400"
+                  : "text-red-400"
+              }`}
+            >
+              {website.status}
+            </p>
 
-              <span className="text-2xl font-bold">
-                {website.status}
-              </span>
-            </div>
-
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-slate-500">
               Server response
             </p>
           </div>
@@ -513,37 +508,55 @@ function AuditResults({
       </div>
 
       {/* Metrics */}
-      <div className="mt-10">
-        <SectionTitle
+      <div className="mt-12">
+        <SectionHeading
           eyebrow="Website Signals"
           title="Key audit metrics"
         />
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Metric
-            label="Page title"
+            label="Page Title"
             value={audit.title ? "Present" : "Missing"}
             good={Boolean(audit.title)}
           />
 
           <Metric
-            label="Meta description"
+            label="Title Length"
+            value={`${audit.titleLength} chars`}
+            good={
+              audit.titleLength >= 30 &&
+              audit.titleLength <= 60
+            }
+          />
+
+          <Metric
+            label="Meta Description"
             value={
               audit.description
-                ? `${audit.descriptionLength} chars`
+                ? "Present"
                 : "Missing"
             }
             good={Boolean(audit.description)}
           />
 
           <Metric
-            label="H1 headings"
+            label="Description Length"
+            value={`${audit.descriptionLength} chars`}
+            good={
+              audit.descriptionLength >= 70 &&
+              audit.descriptionLength <= 160
+            }
+          />
+
+          <Metric
+            label="H1 Headings"
             value={String(audit.h1)}
             good={audit.h1 === 1}
           />
 
           <Metric
-            label="H2 headings"
+            label="H2 Headings"
             value={String(audit.h2)}
             good={audit.h2 > 0}
           />
@@ -555,7 +568,7 @@ function AuditResults({
           />
 
           <Metric
-            label="Missing alt text"
+            label="Missing Alt"
             value={String(audit.imagesMissingAlt)}
             good={audit.imagesMissingAlt === 0}
           />
@@ -567,63 +580,79 @@ function AuditResults({
           />
 
           <Metric
-            label="Word count"
+            label="Word Count"
             value={String(audit.wordCount)}
             good={audit.wordCount >= 600}
+          />
+
+          <Metric
+            label="Canonical"
+            value={audit.canonical ? "Found" : "Missing"}
+            good={audit.canonical}
+          />
+
+          <Metric
+            label="Sitemap"
+            value={audit.sitemap ? "Found" : "Missing"}
+            good={audit.sitemap}
           />
         </div>
       </div>
 
-      {/* Checks */}
+      {/* Technical Checks */}
       <div className="mt-12">
-        <SectionTitle
+        <SectionHeading
           eyebrow="Technical Health"
-          title={`${passedChecks}/${checks.length} checks passed`}
+          title={`${passed}/${checks.length} checks passed`}
         />
 
         <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]">
-          {checks.map((check) => (
+          {checks.map(([name, isGood]) => (
             <div
-              key={check.name}
-              className="flex items-center justify-between border-b border-white/5 px-5 py-4 last:border-b-0"
+              key={name}
+              className="flex items-center justify-between border-b border-white/5 px-5 py-4 last:border-0"
             >
               <div className="flex items-center gap-3">
-                {check.passed ? (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                ) : (
-                  <XCircle className="h-5 w-5 text-red-400" />
-                )}
+                <span
+                  className={
+                    isGood
+                      ? "text-emerald-400"
+                      : "text-red-400"
+                  }
+                >
+                  {isGood ? "✓" : "×"}
+                </span>
 
                 <span className="text-sm text-slate-200">
-                  {check.name}
+                  {name}
                 </span>
               </div>
 
               <span
                 className={
-                  check.passed
+                  isGood
                     ? "text-xs font-medium text-emerald-400"
                     : "text-xs font-medium text-red-400"
                 }
               >
-                {check.passed ? "Passed" : "Needs attention"}
+                {isGood ? "Passed" : "Needs attention"}
               </span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* AI */}
+      {/* AI Recommendations */}
       <div className="mt-12">
-        <div className="overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-600/[0.08] via-white/[0.025] to-cyan-500/[0.05]">
-          <div className="border-b border-white/10 p-6 sm:p-8">
+        <div className="overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-600/[0.08] via-white/[0.025] to-cyan-500/[0.06]">
+          <div className="border-b border-white/10 p-7 sm:p-9">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/15 text-blue-300">
-                <Sparkles className="h-5 w-5" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/15 text-lg text-blue-300">
+                ✦
               </div>
 
               <div>
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-blue-400">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-400">
                   BrandPilot AI
                 </p>
 
@@ -633,27 +662,30 @@ function AuditResults({
               </div>
             </div>
 
-            {ai.summary && (
-              <p className="mt-6 max-w-4xl text-sm leading-7 text-slate-300">
-                {ai.summary}
-              </p>
-            )}
+            <p className="mt-6 max-w-4xl text-sm leading-7 text-slate-300">
+              {ai?.summary ||
+                "Your technical audit has been completed successfully."}
+            </p>
           </div>
 
           <div className="divide-y divide-white/5">
-            {ai.recommendations &&
+            {ai?.recommendations &&
             ai.recommendations.length > 0 ? (
-              ai.recommendations.map((recommendation, index) => (
-                <Recommendation
-                  key={`${recommendation.title}-${index}`}
-                  index={index + 1}
-                  recommendation={recommendation}
-                />
-              ))
+              ai.recommendations.map(
+                (recommendation, index) => (
+                  <Recommendation
+                    key={`${recommendation.title}-${index}`}
+                    number={index + 1}
+                    recommendation={recommendation}
+                  />
+                )
+              )
             ) : (
-              <div className="p-8 text-sm text-slate-400">
-                No AI recommendations were returned. The technical
-                audit is still available above.
+              <div className="p-8 text-sm leading-7 text-slate-400">
+                The technical audit completed successfully.
+                AI recommendations are currently unavailable.
+                Check that your Gemini API key is configured in
+                Vercel.
               </div>
             )}
           </div>
@@ -661,29 +693,32 @@ function AuditResults({
       </div>
 
       {/* CTA */}
-      <div className="mt-12 overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-r from-blue-600/15 via-blue-500/10 to-cyan-500/10 p-8 text-center sm:p-12">
-        <Sparkles className="mx-auto h-8 w-8 text-blue-300" />
+      <div className="mt-12 rounded-3xl border border-blue-500/20 bg-gradient-to-r from-blue-600/15 via-blue-500/10 to-cyan-500/10 p-8 text-center sm:p-12">
+        <div className="text-3xl">✦</div>
 
         <h2 className="mt-5 text-2xl font-bold sm:text-3xl">
           Ready to improve your website?
         </h2>
 
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-400">
-          BrandPilot can help turn these insights into a stronger
-          digital presence, better visibility and more opportunities.
+          Turn your audit insights into a stronger digital presence,
+          better visibility and more opportunities.
         </p>
 
         <a
           href="/#contact"
-          className="mt-7 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3 font-semibold transition hover:from-blue-500 hover:to-cyan-400"
+          className="mt-7 inline-flex rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3 font-semibold transition hover:from-blue-500 hover:to-cyan-400"
         >
-          Talk to BrandPilot
-          <ArrowRight className="h-4 w-4" />
+          Talk to BrandPilot →
         </a>
       </div>
     </section>
   );
 }
+
+/* =========================================================
+   SCORE COMPONENTS
+========================================================= */
 
 function ScoreCircle({
   score,
@@ -692,14 +727,16 @@ function ScoreCircle({
   score: number;
   large?: boolean;
 }) {
-  const { radius, circumference, progress } =
-    scoreRing(score);
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const offset =
+    circumference - (score / 100) * circumference;
 
-  const size = large ? 180 : 90;
+  const size = large ? 180 : 92;
 
   return (
     <div
-      className="relative"
+      className="relative mx-auto mt-8"
       style={{
         width: size,
         height: size,
@@ -708,33 +745,33 @@ function ScoreCircle({
       <svg
         width={size}
         height={size}
-        viewBox="0 0 130 130"
+        viewBox="0 0 120 120"
         className="-rotate-90"
       >
         <circle
-          cx="65"
-          cy="65"
+          cx="60"
+          cy="60"
           r={radius}
-          fill="transparent"
+          fill="none"
           stroke="rgba(255,255,255,0.08)"
-          strokeWidth="9"
+          strokeWidth="8"
         />
 
         <circle
-          cx="65"
-          cy="65"
+          cx="60"
+          cy="60"
           r={radius}
-          fill="transparent"
-          stroke="url(#scoreGradient)"
-          strokeWidth="9"
+          fill="none"
+          stroke="url(#auditGradient)"
+          strokeWidth="8"
           strokeLinecap="round"
           strokeDasharray={circumference}
-          strokeDashoffset={progress}
+          strokeDashoffset={offset}
         />
 
         <defs>
           <linearGradient
-            id="scoreGradient"
+            id="auditGradient"
             x1="0%"
             y1="0%"
             x2="100%"
@@ -757,37 +794,39 @@ function ScoreCircle({
           {score}
         </span>
 
-        <span className="text-xs text-slate-500">/100</span>
+        <span className="text-xs text-slate-500">
+          /100
+        </span>
       </div>
     </div>
   );
 }
 
 function ScoreCard({
-  icon,
   title,
   score,
 }: {
-  icon: React.ReactNode;
   title: string;
   score: number;
 }) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.035] p-5">
-      <div className="flex items-center gap-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-300">
-          {icon}
-        </div>
+      <div>
+        <p className="text-sm font-semibold">{title}</p>
 
-        <div>
-          <p className="text-sm font-semibold">{title}</p>
-          <p className="mt-1 text-xs text-slate-500">
-            {scoreLabel(score)}
-          </p>
-        </div>
+        <p
+          className={`mt-1 text-xs ${getScoreColor(score)}`}
+        >
+          {getScoreText(score)}
+        </p>
       </div>
 
-      <ScoreCircle score={score} />
+      <div className="text-2xl font-bold">
+        {score}
+        <span className="text-xs text-slate-600">
+          /100
+        </span>
+      </div>
     </div>
   );
 }
@@ -808,21 +847,25 @@ function Metric({
       </p>
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        <span className="text-lg font-semibold text-white">
+        <span className="text-lg font-semibold">
           {value}
         </span>
 
-        {good ? (
-          <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-        ) : (
-          <AlertCircle className="h-5 w-5 text-amber-400" />
-        )}
+        <span
+          className={
+            good
+              ? "text-emerald-400"
+              : "text-yellow-400"
+          }
+        >
+          {good ? "✓" : "!"}
+        </span>
       </div>
     </div>
   );
 }
 
-function SectionTitle({
+function SectionHeading({
   eyebrow,
   title,
 }: {
@@ -831,7 +874,7 @@ function SectionTitle({
 }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-[0.2em] text-blue-400">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">
         {eyebrow}
       </p>
 
@@ -843,51 +886,44 @@ function SectionTitle({
 }
 
 function Recommendation({
-  index,
+  number,
   recommendation,
 }: {
-  index: number;
-  recommendation: {
-    priority: "high" | "medium" | "low";
-    category: string;
-    title: string;
-    description: string;
-  };
+  number: number;
+  recommendation: Recommendation;
 }) {
-  const priorityStyles = {
-    high: "border-red-500/20 bg-red-500/10 text-red-300",
-    medium: "border-amber-500/20 bg-amber-500/10 text-amber-300",
-    low: "border-blue-500/20 bg-blue-500/10 text-blue-300",
-  };
-
   return (
     <div className="p-6 sm:p-7">
       <div className="flex gap-5">
-        <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-sm font-bold text-slate-400 sm:flex">
-          {String(index).padStart(2, "0")}
+        <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-sm font-bold text-slate-500 sm:flex">
+          {String(number).padStart(2, "0")}
         </div>
 
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
-                priorityStyles[recommendation.priority]
-              }`}
+              className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${getPriorityClass(
+                recommendation.priority
+              )}`}
             >
-              {recommendation.priority}
+              {recommendation.priority || "low"}
             </span>
 
-            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-slate-400">
-              {recommendation.category}
-            </span>
+            {recommendation.category && (
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-400">
+                {recommendation.category}
+              </span>
+            )}
           </div>
 
           <h3 className="mt-3 text-lg font-semibold">
-            {recommendation.title}
+            {recommendation.title ||
+              "Website improvement opportunity"}
           </h3>
 
           <p className="mt-2 text-sm leading-7 text-slate-400">
-            {recommendation.description}
+            {recommendation.description ||
+              "Review this area of your website and improve it based on the audit results."}
           </p>
         </div>
       </div>
