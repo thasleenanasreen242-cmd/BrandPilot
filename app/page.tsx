@@ -448,15 +448,14 @@ export default function Home() {
     BrandPilot Digital
   </p>
 
-  <h1 className="gradient-text text-4xl md:text-7xl font-black mt-8 leading-tight">
-    Helping Brands
-    <br />
-    Take Off.
-  </h1>
-
-  <p className="text-gray-400 text-lg md:text-xl font-medium mt-3 tracking-wide">
-    AI-Powered Web Design &amp; Digital Marketing Agency
-  </p>
+ <h1 className="text-5xl md:text-8xl font-black mt-8 leading-tight text-white">
+  Helping Brands
+  <br />
+  Take Off.
+</h1>
+<p className="text-blue-400 font-semibold text-lg md:text-xl mt-3 tracking-wide">
+  AI-Powered Web Design & Digital Marketing Agency
+</p>
 
   <p className="text-gray-400 mt-6 max-w-2xl text-xl leading-9">
     BrandPilot helps businesses grow online with custom website design,
