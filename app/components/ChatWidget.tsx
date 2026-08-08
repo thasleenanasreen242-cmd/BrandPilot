@@ -1,86 +1,100 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
-type Message = { role: "user" | "assistant"; text: string };
+type Message = { role: "user" | "assistant"; content: string };
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
-  const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", text: "Hi! I'm the BrandPilot AI assistant. Ask me anything about our services." },
+    { role: "assistant", content: "Hi! I'm the BrandPilot assistant. Ask me about our services, pricing, or process 👋" },
   ]);
-  const [sending, setSending] = useState(false);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  async function handleSend(e: React.FormEvent) {
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, open]);
+
+  async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
-    if (!input.trim() || sending) return;
+    if (!input.trim() || loading) return;
 
-    const userMessage: Message = { role: "user", text: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages: Message[] = [...messages, { role: "user", content: input }];
+    setMessages(newMessages);
     setInput("");
-    setSending(true);
+    setLoading(true);
 
-    // NOTE: This is a placeholder response. The original Gemini-connected
-    // logic for this component was not present in the repo, so this needs
-    // to be wired to a real API route (e.g. POST /api/chat calling the
-    // Gemini API) before this goes live. See the note below the component.
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+      const data = await res.json();
+      if (data.reply) {
+        setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "Sorry, something went wrong. Please try again or use the contact form." },
+        ]);
+      }
+    } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          text: "Thanks for your message! (This is a placeholder reply — the AI backend for this widget still needs to be connected.)",
-        },
+        { role: "assistant", content: "Sorry, I couldn't connect. Please try again or use the contact form." },
       ]);
-      setSending(false);
-    }, 600);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <>
       {open && (
-        <div className="fixed bottom-24 right-6 w-80 max-h-[28rem] bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-blue-500/10 z-50 flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-            <span className="font-semibold text-sm">BrandPilot AI Assistant</span>
-            <button
-              onClick={() => setOpen(false)}
-              aria-label="Close chat"
-              className="text-gray-400 hover:text-white transition"
-            >
-              ✕
+        <div className="fixed bottom-24 right-6 w-[calc(100vw-3rem)] max-w-sm h-[28rem] bg-zinc-950 border border-white/10 rounded-3xl shadow-2xl z-50 flex flex-col overflow-hidden">
+          <div className="flex justify-between items-center px-5 py-4 border-b border-white/10 bg-white/5">
+            <div>
+              <p className="font-bold text-white">BrandPilot Assistant</p>
+              <p className="text-xs text-gray-400">Ask about services & pricing</p>
+            </div>
+            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white text-2xl leading-none">
+              ×
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
             {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`text-sm leading-5 max-w-[85%] px-3 py-2 rounded-xl ${
-                  m.role === "user"
-                    ? "bg-blue-500 text-white ml-auto"
-                    : "bg-white/10 text-gray-200"
-                }`}
-              >
-                {m.text}
+              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm leading-relaxed ${
+                    m.role === "user" ? "bg-blue-500 text-white" : "bg-white/10 text-gray-200"
+                  }`}
+                >
+                  {m.content}
+                </div>
               </div>
             ))}
-            {sending && (
-              <div className="text-xs text-gray-500">Typing...</div>
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-white/10 text-gray-400 px-4 py-2 rounded-2xl text-sm">Typing...</div>
+              </div>
             )}
           </div>
 
-          <form onSubmit={handleSend} className="flex gap-2 p-3 border-t border-white/10">
+          <form onSubmit={sendMessage} className="flex gap-2 p-3 border-t border-white/10">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type a message..."
-              className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400/50"
+              placeholder="Type your question..."
+              className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-blue-400/50"
             />
             <button
               type="submit"
-              disabled={sending}
-              className="px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 transition text-sm font-semibold disabled:opacity-50"
+              disabled={loading}
+              className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-4 rounded-xl font-semibold text-sm"
             >
               Send
             </button>
@@ -89,11 +103,11 @@ export default function ChatWidget() {
       )}
 
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(!open)}
+        className="fixed bottom-6 right-24 bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 transition text-xl"
         aria-label="Open chat assistant"
-        className="fixed bottom-6 right-24 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white p-4 rounded-full shadow-lg z-50 flex items-center justify-center text-xl"
       >
-        {open ? "✕" : "🤖"}
+        {open ? "×" : "🤖"}
       </button>
     </>
   );
