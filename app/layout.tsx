@@ -6,6 +6,7 @@ const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -13,8 +14,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
+
   description:
     "BrandPilot helps businesses grow online with custom website design, SEO, branding, social media marketing, paid advertising, email marketing, and AI-powered digital solutions.",
+
   keywords: [
     "BrandPilot",
     "web design",
@@ -30,24 +33,43 @@ export const metadata: Metadata = {
     "AI employees",
     "AI audit",
   ],
+
   alternates: {
     canonical: "https://www.brandpilotcloud.com",
   },
+
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
+
   openGraph: {
-    title: "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
+    title:
+      "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
+
     description:
       "BrandPilot helps businesses grow online with custom website design, SEO, branding, social media marketing, paid advertising, email marketing, and AI-powered digital solutions.",
+
     url: "https://www.brandpilotcloud.com",
+
     siteName: "BrandPilot",
+
     type: "website",
+
     locale: "en_US",
   },
+
   twitter: {
     card: "summary_large_image",
-    title: "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
+
+    title:
+      "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
+
     description:
       "BrandPilot helps businesses grow online with custom website design, SEO, branding, social media marketing, paid advertising, email marketing, and AI-powered digital solutions.",
   },
+
   robots: "index, follow",
 };
 
@@ -61,7 +83,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
