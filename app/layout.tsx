@@ -2,85 +2,41 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const siteUrl = "https://www.brandpilotcloud.com";
+const title = "BrandPilot | Web Design & Digital Marketing Agency";
+const description = "BrandPilot helps businesses grow with web design, SEO, branding, social media, paid ads, email marketing, and AI-powered digital marketing.";
 
 export const metadata: Metadata = {
-  title: "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
-
-  description:
-    "BrandPilot helps businesses grow online with custom website design, SEO, branding, social media marketing, paid advertising, email marketing, and AI-powered digital solutions.",
-
-  keywords: [
-    "BrandPilot",
-    "web design",
-    "website development",
-    "SEO",
-    "digital marketing",
-    "branding",
-    "social media marketing",
-    "Google Ads",
-    "Meta Ads",
-    "email marketing",
-    "AI marketing",
-    "AI employees",
-    "AI audit",
-  ],
-
-  alternates: {
-    canonical: "https://www.brandpilotcloud.com",
-  },
-
-  icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
-  },
-
+  metadataBase: new URL(siteUrl),
+  title,
+  description,
+  keywords: ["web design", "website development", "SEO", "digital marketing", "branding", "social media marketing", "Google Ads", "Meta Ads", "email marketing", "AI marketing"],
+  alternates: { canonical: siteUrl },
+  icons: { icon: "/icon.png", shortcut: "/icon.png", apple: "/icon.png" },
   openGraph: {
-    title: "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
-
-    description:
-      "BrandPilot helps businesses grow online with custom website design, SEO, branding, social media marketing, paid advertising, email marketing, and AI-powered digital solutions.",
-
-    url: "https://www.brandpilotcloud.com",
-
+    title,
+    description,
+    url: siteUrl,
     siteName: "BrandPilot",
-
     type: "website",
-
     locale: "en_US",
+    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "BrandPilot digital marketing agency" }],
   },
-
   twitter: {
     card: "summary_large_image",
-
-    title: "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
-
-    description:
-      "BrandPilot helps businesses grow online with custom website design, SEO, branding, social media marketing, paid advertising, email marketing, and AI-powered digital solutions.",
+    title,
+    description,
+    images: ["/logo.png"],
   },
-
-  robots: "index, follow",
+  robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body>{children}</body>
     </html>
   );
