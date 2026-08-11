@@ -1,5 +1,7 @@
 "use client";
+
 import Link from "next/link";
+
 const aiEmployees = [
   {
     icon: "📈",
@@ -13,6 +15,7 @@ const aiEmployees = [
       "Content planning",
       "Competitor research",
     ],
+    href: "/marketing-ai",
   },
   {
     icon: "🤝",
@@ -26,6 +29,7 @@ const aiEmployees = [
       "Follow-ups",
       "Booking assistance",
     ],
+    href: "/sales-ai",
   },
   {
     icon: "🔍",
@@ -39,8 +43,10 @@ const aiEmployees = [
       "Content ideas",
       "Ranking strategy",
     ],
+    href: "/seo-ai",
   },
 ];
+
 export default function AIEmployees() {
   return (
     <section className="py-24 px-6" id="ai-employees">
@@ -48,9 +54,11 @@ export default function AIEmployees() {
         <h2 className="text-5xl font-bold text-center">
           AI Employees
         </h2>
+
         <p className="text-gray-400 text-center mt-4">
           Meet your digital team powered by artificial intelligence.
         </p>
+
         <div className="grid md:grid-cols-3 gap-8 mt-12">
           {aiEmployees.map((employee) => (
             <div
@@ -60,18 +68,22 @@ export default function AIEmployees() {
               <div className="text-5xl">
                 {employee.icon}
               </div>
+
               <h3 className="text-2xl font-bold mt-5">
                 {employee.name}
               </h3>
+
               <p className="text-blue-400 mt-2">
                 {employee.role}
               </p>
+
               <p className="text-gray-400 mt-4 leading-7">
                 {employee.description}
               </p>
+
               <ul className="mt-6 space-y-3">
-                {employee.features.map((feature)=>(
-                  <li 
+                {employee.features.map((feature) => (
+                  <li
                     key={feature}
                     className="text-gray-300 text-sm"
                   >
@@ -79,12 +91,13 @@ export default function AIEmployees() {
                   </li>
                 ))}
               </ul>
-             <Link
-  href="/marketing-ai"
-  className="mt-8 block w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 transition font-bold text-center"
->
-  Activate AI
-</Link>
+
+              <Link
+                href={employee.href}
+                className="mt-8 block w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 transition font-bold text-center"
+              >
+                Activate AI
+              </Link>
             </div>
           ))}
         </div>
