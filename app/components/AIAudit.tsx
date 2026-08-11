@@ -13,8 +13,14 @@ export default function AIAudit() {
           data-reveal
           className="card-glow mt-12 bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 grid md:grid-cols-2 gap-10 items-center hover:border-blue-400/30 transition-all"
         >
-          {/* Left: copy */}
           <div>
+            <img
+              src="/logo.png"
+              alt="BrandPilot digital marketing agency logo"
+              width={220}
+              height={60}
+              className="w-auto h-12 mb-5 object-contain object-left"
+            />
             <span className="text-3xl">📊</span>
             <h3 className="text-3xl font-bold mt-4 mb-3">Free AI-Powered SEO & Marketing Audit</h3>
             <p className="text-gray-400 leading-6">
@@ -47,7 +53,6 @@ export default function AIAudit() {
             </p>
           </div>
 
-          {/* Right: score preview */}
           <div className="rounded-2xl border border-white/10 bg-black/30 p-8">
             <div className="flex justify-center mb-6">
               <ScoreGauge value={84} />
@@ -79,7 +84,7 @@ function ScoreGauge({ value }: { value: number }) {
   const circumference = 2 * Math.PI * 54;
   const offset = circumference - (value / 100) * circumference;
   return (
-    <svg width="140" height="140" viewBox="0 0 120 120">
+    <svg width="140" height="140" viewBox="0 0 120 120" aria-label={`Website audit score: ${value} out of 100`} role="img">
       <circle cx="60" cy="60" r="54" fill="none" stroke="#ffffff1a" strokeWidth="8" />
       <circle
         cx="60"
