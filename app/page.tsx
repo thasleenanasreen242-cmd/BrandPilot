@@ -444,26 +444,22 @@ export default function Home() {
     transition: "opacity 1s ease, transform 1s ease",
   }}
 >
-  <p className="uppercase tracking-[0.4em] text-gray-400">
-    BrandPilot Digital
-  </p>
-
+ 
  <h1 className="text-5xl md:text-8xl font-black mt-8 leading-tight text-white">
   Helping Brands
   <br />
   Take Off.
 </h1>
+  
 <p className="text-blue-400 font-semibold text-lg md:text-xl mt-3 tracking-wide">
   AI-Powered Web Design & Digital Marketing Agency
 </p>
-
   <p className="text-gray-400 mt-6 max-w-2xl text-xl leading-9">
-    BrandPilot helps businesses grow online with custom website design,
-    responsive web development, SEO, branding, social media marketing,
-    Google Ads, Meta Ads, email marketing, and AI-powered digital
-    marketing solutions that generate more traffic, leads, and sales.
-  </p>
-
+  BrandPilot combines web design, SEO, branding, digital marketing, and
+  AI-powered solutions to help businesses drive more traffic, leads, and
+  sales.
+</p>
+  
   <div className="mt-12 flex flex-wrap justify-center md:justify-start gap-4">
     <a
       href="#contact"
@@ -474,7 +470,7 @@ export default function Home() {
     </a>
 
     <a
-      href="https://calendly.com/thasleenanasreen242/30min"
+     href="https://calendly.com/thasleenanasreen242/30min"
       target="_blank"
       rel="noopener noreferrer"
       className="btn-pulse inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-blue-400 text-blue-300 hover:bg-blue-500/20 font-bold hover:scale-105 transition shadow-lg shadow-blue-500/10 backdrop-blur-sm"
