@@ -4,9 +4,9 @@ export default function AIAudit() {
   return (
     <section id="ai-audit" className="py-24 px-6">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-5xl font-bold text-center">AI Business Audit</h2>
+        <h2 className="text-5xl font-bold text-center">Free AI Website & SEO Audit</h2>
         <p className="text-gray-400 text-center mt-4 max-w-2xl mx-auto">
-          Know what's holding your business back — free.
+          Find SEO, website performance, branding, and digital marketing opportunities that can help your business grow online.
         </p>
 
         <div
@@ -16,18 +16,16 @@ export default function AIAudit() {
           {/* Left: copy */}
           <div>
             <span className="text-3xl">📊</span>
-            <h3 className="text-3xl font-bold mt-4 mb-3">Free AI-Powered Audit</h3>
+            <h3 className="text-3xl font-bold mt-4 mb-3">Free AI-Powered SEO & Marketing Audit</h3>
             <p className="text-gray-400 leading-6">
-              Get an instant, AI-generated health score for your website, SEO,
-              brand, and marketing — plus a prioritized list of exactly what
-              to fix first.
+              Get an instant AI-generated health score for your website, SEO, brand, and digital marketing. Discover technical SEO issues, content opportunities, website performance improvements, and practical recommendations to strengthen your online presence.
             </p>
 
             <ul className="mt-6 space-y-3">
               {[
                 "Website, SEO, brand & performance scores",
-                "AI-generated fix recommendations",
-                "Competitor benchmarking",
+                "AI-generated SEO and marketing recommendations",
+                "Competitor benchmarking and growth opportunities",
                 "Free forever, no credit card required",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2 text-gray-300 text-sm">
