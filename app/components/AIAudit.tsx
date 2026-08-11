@@ -14,14 +14,7 @@ export default function AIAudit() {
           className="card-glow mt-12 bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 grid md:grid-cols-2 gap-10 items-center hover:border-blue-400/30 transition-all"
         >
           <div>
-            <img
-              src="/logo.png"
-              alt="BrandPilot digital marketing agency logo"
-              width={220}
-              height={60}
-              className="w-auto h-12 mb-5 object-contain object-left"
-            />
-            <span className="text-3xl">📊</span>
+            <span className="text-3xl" role="img" aria-label="Website analytics">📊</span>
             <h3 className="text-3xl font-bold mt-4 mb-3">Free AI-Powered SEO & Marketing Audit</h3>
             <p className="text-gray-400 leading-6">
               Get an instant AI-generated health score for your website, SEO, brand, and digital marketing. Discover technical SEO issues, content opportunities, website performance improvements, and practical recommendations to strengthen your online presence.
