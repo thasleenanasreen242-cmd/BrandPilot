@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     siteName: "BrandPilot",
     type: "website",
     locale: "en_US",
-    images: [{ url: "/logo.png", width: 1200, height: 630, alt: "BrandPilot digital marketing agency" }],
+    images: [{ url: "/icon.png", width: 512, height: 512, alt: "BrandPilot" }],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: ["/logo.png"],
+    images: ["/icon.png"],
   },
   robots: { index: true, follow: true },
 };
