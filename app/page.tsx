@@ -445,7 +445,7 @@ export default function Home() {
   }}
 >
  
- <h1 className="text-5xl md:text-8xl font-black mt-8 leading-tight text-white">
+<h1 className="gradient-text text-5xl md:text-8xl font-black mt-8 leading-tight">
   Helping Brands
   <br />
   Take Off.
