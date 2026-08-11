@@ -39,14 +39,13 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
+    icon: "/icon.jpeg",
+    shortcut: "/icon.jpeg",
+    apple: "/icon.jpeg",
   },
 
   openGraph: {
-    title:
-      "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
+    title: "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
 
     description:
       "BrandPilot helps businesses grow online with custom website design, SEO, branding, social media marketing, paid advertising, email marketing, and AI-powered digital solutions.",
@@ -63,8 +62,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
 
-    title:
-      "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
+    title: "BrandPilot | AI-Powered Web Design & Digital Marketing Agency",
 
     description:
       "BrandPilot helps businesses grow online with custom website design, SEO, branding, social media marketing, paid advertising, email marketing, and AI-powered digital solutions.",
