@@ -1,26 +1,198 @@
 "use client";
 
+import { FormEvent, useState } from "react";
 import Link from "next/link";
 
-const tools = ["Keyword research", "SEO audits", "Content ideas", "Ranking strategy"];
+type AuditResponse = {
+  success: boolean;
+  website?: { url: string; hostname: string; status: number };
+  scores?: {
+    overall: number;
+    seo: number;
+    performance: number;
+    content: number;
+    brand: number;
+    technical: number;
+  };
+  audit?: {
+    title: string;
+    titleLength: number;
+    description: string;
+    descriptionLength: number;
+    h1: number;
+    h2: number;
+    images: number;
+    imagesMissingAlt: number;
+    links: number;
+    wordCount: number;
+    canonical: boolean;
+    viewport: boolean;
+    robots: boolean;
+    sitemap: boolean;
+    https: boolean;
+    status: number;
+  };
+  ai?: {
+    summary?: string;
+    recommendations?: Array<{
+      priority: "high" | "medium" | "low";
+      category: string;
+      title: string;
+      description: string;
+    }>;
+  };
+  error?: string;
+};
+
+const scoreCards = [
+  ["SEO", "seo"],
+  ["Performance", "performance"],
+  ["Content", "content"],
+  ["Technical", "technical"],
+  ["Brand", "brand"],
+] as const;
+
+function scoreClass(score: number) {
+  if (score >= 80) return "text-emerald-400";
+  if (score >= 60) return "text-amber-400";
+  return "text-red-400";
+}
+
+function Check({ ok }: { ok: boolean }) {
+  return <span className={ok ? "text-emerald-400" : "text-red-400"}>{ok ? "✓" : "×"}</span>;
+}
 
 export default function SEOAIPage() {
+  const [url, setUrl] = useState("");
+  const [result, setResult] = useState<AuditResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function runAudit(event: FormEvent) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    setResult(null);
+
+    try {
+      const response = await fetch("/api/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+
+      const data: AuditResponse = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.error || "Audit failed.");
+      setResult(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to complete the audit.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-black via-zinc-950 to-black text-white px-6 py-24">
-      <div className="max-w-5xl mx-auto">
-        <Link href="/" className="text-blue-400 hover:text-blue-300">← Back to BrandPilot</Link>
-        <div className="mt-12 max-w-3xl">
-          <p className="uppercase tracking-[0.3em] text-blue-400 text-sm">AI Employee</p>
-          <h1 className="text-5xl md:text-7xl font-black mt-4">SEO AI</h1>
-          <p className="text-xl text-gray-400 mt-6 leading-8">Your AI SEO Specialist for keyword discovery, website optimization, content opportunities, and search growth.</p>
-        </div>
-        <div className="grid md:grid-cols-2 gap-6 mt-14">
-          {tools.map((tool) => <div key={tool} className="rounded-2xl border border-white/10 bg-white/5 p-6"><span className="text-blue-400">✓</span><span className="ml-3 font-semibold">{tool}</span></div>)}
-        </div>
-        <div className="mt-12 rounded-3xl border border-blue-400/20 bg-blue-500/10 p-8">
-          <h2 className="text-2xl font-bold">Ready to improve your search visibility?</h2>
-          <p className="text-gray-400 mt-3">Book a free call to identify SEO opportunities for your website.</p>
-          <a href="https://calendly.com/thasleenanasreen242/30min" target="_blank" rel="noopener noreferrer" className="inline-block mt-6 rounded-full bg-blue-500 px-7 py-3 font-bold hover:bg-blue-600 transition">Book a Free Call →</a>
+    <main className="min-h-screen bg-gradient-to-br from-black via-zinc-950 to-black text-white px-6 py-16 md:py-24">
+      <div className="mx-auto max-w-6xl">
+        <Link href="/" className="text-blue-400 transition hover:text-blue-300">← Back to BrandPilot</Link>
+
+        <section className="mt-10 text-center">
+          <p className="text-sm uppercase tracking-[0.3em] text-blue-400">BrandPilot SEO Intelligence</p>
+          <h1 className="mt-4 text-5xl font-black tracking-tight md:text-7xl">SEO Audit Dashboard</h1>
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-gray-400">
+            Scan any public website for SEO, content, technical and performance signals, then get practical AI recommendations powered by Gemini.
+          </p>
+
+          <form onSubmit={runAudit} className="mx-auto mt-10 flex max-w-3xl flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 shadow-2xl md:flex-row">
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              type="url"
+              required
+              placeholder="https://example.com"
+              className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/50 px-5 py-4 text-white outline-none placeholder:text-gray-600 focus:border-blue-500"
+            />
+            <button disabled={loading} className="rounded-xl bg-blue-500 px-7 py-4 font-bold transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60">
+              {loading ? "Analyzing…" : "Run SEO Audit →"}
+            </button>
+          </form>
+          {error && <p className="mx-auto mt-4 max-w-3xl rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-left text-sm text-red-300">{error}</p>}
+        </section>
+
+        {result?.scores && result.audit && (
+          <section className="mt-14 space-y-6">
+            <div className="rounded-3xl border border-blue-400/20 bg-white/[0.03] p-6 md:p-8">
+              <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Audit report</p>
+                  <h2 className="mt-1 text-2xl font-bold">{result.website?.hostname}</h2>
+                  <p className="mt-1 text-sm text-gray-500">HTTP {result.audit.status} · {result.audit.https ? "HTTPS secured" : "HTTPS missing"}</p>
+                </div>
+                <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-black/30 px-6 py-4">
+                  <div className={`text-5xl font-black ${scoreClass(result.scores.overall)}`}>{result.scores.overall}</div>
+                  <div><p className="font-bold">Overall Score</p><p className="text-sm text-gray-500">out of 100</p></div>
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                {scoreCards.map(([label, key]) => {
+                  const value = result.scores![key];
+                  return (
+                    <div key={key} className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                      <p className="text-sm text-gray-500">{label}</p>
+                      <p className={`mt-2 text-3xl font-black ${scoreClass(value)}`}>{value}</p>
+                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-current" style={{ width: `${value}%` }} /></div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 md:p-8">
+                <h2 className="text-2xl font-bold">On-page SEO</h2>
+                <div className="mt-6 space-y-4 text-sm">
+                  <div className="flex justify-between gap-4 border-b border-white/5 pb-4"><span>Title</span><span className="text-right text-gray-400">{result.audit.title || "Missing"} ({result.audit.titleLength})</span></div>
+                  <div className="flex justify-between gap-4 border-b border-white/5 pb-4"><span>Meta description</span><span className="text-right text-gray-400">{result.audit.description ? `${result.audit.descriptionLength} characters` : "Missing"}</span></div>
+                  <div className="flex justify-between border-b border-white/5 pb-4"><span>H1 headings</span><span>{result.audit.h1}</span></div>
+                  <div className="flex justify-between border-b border-white/5 pb-4"><span>H2 headings</span><span>{result.audit.h2}</span></div>
+                  <div className="flex justify-between"><span>Words</span><span>{result.audit.wordCount.toLocaleString()}</span></div>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 md:p-8">
+                <h2 className="text-2xl font-bold">Technical checks</h2>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  {[
+                    ["HTTPS", result.audit.https], ["Canonical", result.audit.canonical], ["Viewport", result.audit.viewport], ["Robots meta", result.audit.robots], ["Sitemap", result.audit.sitemap], ["Image alt text", result.audit.imagesMissingAlt === 0],
+                  ].map(([label, ok]) => (
+                    <div key={String(label)} className="flex items-center justify-between rounded-xl border border-white/5 bg-black/20 p-4"><span>{label}</span><Check ok={Boolean(ok)} /></div>
+                  ))}
+                </div>
+                <p className="mt-5 text-sm text-gray-500">{result.audit.images} images · {result.audit.imagesMissingAlt} missing alt attributes · {result.audit.links} links</p>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-blue-400/20 bg-blue-500/5 p-6 md:p-8">
+              <div className="flex items-center gap-3"><span className="text-2xl">✦</span><h2 className="text-2xl font-bold">Gemini AI Recommendations</h2></div>
+              <p className="mt-4 leading-7 text-gray-300">{result.ai?.summary || "Your audit is complete."}</p>
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                {(result.ai?.recommendations || []).map((item, index) => (
+                  <div key={`${item.title}-${index}`} className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                    <div className="flex items-center justify-between gap-3"><span className="text-xs uppercase tracking-wider text-blue-400">{item.category}</span><span className={`text-xs font-bold uppercase ${item.priority === "high" ? "text-red-400" : item.priority === "medium" ? "text-amber-400" : "text-emerald-400"}`}>{item.priority}</span></div>
+                    <h3 className="mt-3 font-bold">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-gray-400">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <div className="mt-14 rounded-3xl border border-blue-400/20 bg-blue-500/10 p-8 text-center">
+          <h2 className="text-2xl font-bold">Want a deeper SEO strategy?</h2>
+          <p className="mt-3 text-gray-400">Book a free call with BrandPilot to turn your audit into a growth plan.</p>
+          <a href="https://calendly.com/thasleenanasreen242/30min" target="_blank" rel="noopener noreferrer" className="mt-6 inline-block rounded-full bg-blue-500 px-7 py-3 font-bold transition hover:bg-blue-600">Book a Free Call →</a>
         </div>
       </div>
     </main>
