@@ -10,12 +10,12 @@ type SpeechRecognitionInstance = {
   interimResults: boolean;
   start: () => void;
   stop: () => void;
+  abort: () => void;
+  onstart: (() => void) | null;
   onresult: ((event: any) => void) | null;
   onend: (() => void) | null;
   onerror: ((event: any) => void) | null;
 };
-
-type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
@@ -26,6 +26,7 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState("Tap the mic and speak");
   const scrollRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
@@ -35,19 +36,14 @@ export default function ChatWidget() {
 
   useEffect(() => {
     const handleAssistantOpen = () => setOpen(true);
-
     const handleAssistantLabelClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (!target) return;
       const label = target.closest("button, p");
-      if (label?.textContent?.trim() === "AI Assistant · BrandPilot") {
-        setOpen(true);
-      }
+      if (label?.textContent?.trim() === "AI Assistant · BrandPilot") setOpen(true);
     };
-
     document.addEventListener("brandpilot:open-chat", handleAssistantOpen);
     document.addEventListener("click", handleAssistantLabelClick);
-
     return () => {
       document.removeEventListener("brandpilot:open-chat", handleAssistantOpen);
       document.removeEventListener("click", handleAssistantLabelClick);
@@ -56,59 +52,121 @@ export default function ChatWidget() {
 
   useEffect(() => {
     return () => {
-      recognitionRef.current?.stop();
+      recognitionRef.current?.abort();
       window.speechSynthesis?.cancel();
     };
   }, []);
 
   function speak(text: string) {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
     utterance.rate = 0.96;
     utterance.pitch = 1.03;
     utterance.volume = 1;
-    utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
+    utterance.onstart = () => { setSpeaking(true); setVoiceStatus("Speaking…"); };
+    utterance.onend = () => { setSpeaking(false); setVoiceStatus("Tap the mic and speak"); };
+    utterance.onerror = () => { setSpeaking(false); setVoiceStatus("Tap the mic and speak"); };
     window.speechSynthesis.speak(utterance);
   }
 
-  function startVoiceInput() {
+  async function startVoiceInput() {
     if (listening) {
-      recognitionRef.current?.stop();
+      recognitionRef.current?.abort();
       setListening(false);
+      setVoiceStatus("Tap the mic and speak");
       return;
     }
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition as SpeechRecognitionConstructor | undefined;
-    if (!SpeechRecognition) {
-      setInput("Voice input isn't supported in this browser. Try Chrome or Edge.");
+    if (typeof window === "undefined" || !window.isSecureContext) {
+      setVoiceStatus("Voice needs HTTPS. Open the Vercel/HTTPS site.");
       return;
     }
 
-    const recognition = new SpeechRecognition();
+    const browserWindow = window as any;
+    const SpeechRecognitionCtor = browserWindow.SpeechRecognition || browserWindow.webkitSpeechRecognition;
+    if (!SpeechRecognitionCtor) {
+      setVoiceStatus("Voice recognition is unavailable. Try Chrome or Edge.");
+      return;
+    }
+
+    try {
+      if (navigator.mediaDevices?.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    } catch (error) {
+      const name = error instanceof DOMException ? error.name : "";
+      if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+        setVoiceStatus("Microphone blocked. Allow microphone access for this site.");
+      } else if (name === "NotFoundError") {
+        setVoiceStatus("No microphone was found.");
+      } else {
+        setVoiceStatus("Microphone access failed. Check browser permissions.");
+      }
+      return;
+    }
+
+    const recognition = new SpeechRecognitionCtor() as SpeechRecognitionInstance;
     recognition.lang = "en-US";
     recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.onresult = (event: any) => {
-      const transcript = event.results?.[0]?.[0]?.transcript?.trim();
-      if (transcript) setInput(transcript);
+    recognition.interimResults = true;
+
+    let finalTranscript = "";
+
+    recognition.onstart = () => {
+      setListening(true);
+      setVoiceStatus("Listening… speak now");
     };
+
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      for (let i = event.resultIndex || 0; i < event.results.length; i++) {
+        const transcript = event.results[i][0]?.transcript || "";
+        if (event.results[i].isFinal) finalTranscript += transcript;
+        else interim += transcript;
+      }
+      const combined = `${finalTranscript} ${interim}`.trim();
+      if (combined) {
+        setInput(combined);
+        setVoiceStatus(interim ? `Hearing: ${interim}` : "Got it");
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      setListening(false);
+      recognitionRef.current = null;
+      const error = event?.error || "unknown";
+      const messagesByError: Record<string, string> = {
+        "not-allowed": "Microphone blocked. Allow microphone access and try again.",
+        "service-not-allowed": "Speech recognition is blocked by the browser.",
+        "audio-capture": "No working microphone was detected.",
+        "no-speech": "I didn't hear anything. Try speaking closer to the mic.",
+        "network": "Speech recognition needs a working internet connection.",
+        "aborted": "Voice input stopped.",
+      };
+      setVoiceStatus(messagesByError[error] || `Voice error: ${error}`);
+    };
+
     recognition.onend = () => {
       setListening(false);
       recognitionRef.current = null;
-    };
-    recognition.onerror = () => {
-      setListening(false);
-      recognitionRef.current = null;
+      if (finalTranscript.trim()) {
+        setVoiceStatus("Voice captured — press Send");
+      } else {
+        setVoiceStatus("Tap the mic and speak");
+      }
     };
 
     recognitionRef.current = recognition;
-    setListening(true);
-    recognition.start();
+    try {
+      recognition.start();
+    } catch {
+      recognitionRef.current = null;
+      setListening(false);
+      setVoiceStatus("Couldn't start the microphone. Try again.");
+    }
   }
 
   async function sendMessage(e: React.FormEvent<HTMLFormElement>) {
@@ -152,9 +210,9 @@ export default function ChatWidget() {
           <div className="flex justify-between items-center px-5 py-4 border-b border-white/10 bg-white/5">
             <div>
               <p className="font-bold text-white">BrandPilot Assistant</p>
-              <p className="text-xs text-gray-400">{listening ? "Listening…" : speaking ? "Speaking…" : "Ask by voice or text"}</p>
+              <p className="text-xs text-blue-300 mt-0.5">{voiceStatus}</p>
             </div>
-            <button onClick={() => { setOpen(false); window.speechSynthesis?.cancel(); setSpeaking(false); }} className="text-gray-400 hover:text-white text-2xl leading-none" aria-label="Close chat">×</button>
+            <button onClick={() => { setOpen(false); recognitionRef.current?.abort(); window.speechSynthesis?.cancel(); setSpeaking(false); setListening(false); }} className="text-gray-400 hover:text-white text-2xl leading-none" aria-label="Close chat">×</button>
           </div>
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
