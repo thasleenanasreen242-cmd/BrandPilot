@@ -60,6 +60,37 @@ function isLeadIntent(messages: ChatMessage[]) {
   return /(hire|work with|interested|price|pricing|cost|quote|book|call|website|seo service|social media service|marketing service|need a website|start a project|proposal)/i.test(text);
 }
 
+async function notifyBrandPilot(lead: LeadData, employee: string, conversation: ChatMessage[]) {
+  const endpoint = process.env.FORMSPREE_LEAD_ENDPOINT || "https://formspree.io/f/xdarbpol";
+  if (!lead.email) return false;
+
+  const transcript = conversation.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        _subject: `New qualified BrandPilot ${employee} lead`,
+        name: lead.name || "Website visitor",
+        email: lead.email,
+        phone: lead.phone || "Not provided",
+        business: lead.business_name || "Not provided",
+        service: lead.service || "Not specified",
+        goal: lead.goal || "Not provided",
+        budget: lead.budget || "Not provided",
+        timeline: lead.timeline || "Not provided",
+        employee,
+        conversation: transcript,
+      }),
+    });
+    if (!response.ok) console.error("Lead email notification failed:", await response.text());
+    return response.ok;
+  } catch (error) {
+    console.error("Lead email notification error:", error);
+    return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { messages, employee = "general" }: { messages: ChatMessage[]; employee?: string } = await req.json();
@@ -86,25 +117,37 @@ export async function POST(req: NextRequest) {
     const text = data.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || "").join("") || "";
 
     let leadSaved = false;
+    let notificationSent = false;
     if (isLeadIntent(messages) && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       const lead = extractLeadData(messages);
-      const userText = messages.filter((m) => m.role === "user").map((m) => m.content).join("\n");
-      const supabaseResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/ai_employee_leads`, {
-        method: "POST",
-        headers: {
-          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-          "Content-Type": "application/json",
-          Prefer: "return=minimal",
-        },
-        body: JSON.stringify({ employee, ...lead, conversation: messages, source: "website_chat", status: "new" }),
-      });
-      leadSaved = supabaseResponse.ok;
-      if (!supabaseResponse.ok) console.error("Lead save error:", await supabaseResponse.text());
-      void userText;
+      const supabaseHeaders = {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      };
+
+      let existingLead = false;
+      if (lead.email) {
+        const lookup = await fetch(`${process.env.SUPABASE_URL}/rest/v1/ai_employee_leads?select=id&email=eq.${encodeURIComponent(lead.email)}&limit=1`, {
+          headers: supabaseHeaders,
+        });
+        existingLead = lookup.ok && (await lookup.json()).length > 0;
+      }
+
+      if (!existingLead) {
+        const supabaseResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/ai_employee_leads`, {
+          method: "POST",
+          headers: supabaseHeaders,
+          body: JSON.stringify({ employee, ...lead, conversation: messages, source: "website_chat", status: "new" }),
+        });
+        leadSaved = supabaseResponse.ok;
+        if (!supabaseResponse.ok) console.error("Lead save error:", await supabaseResponse.text());
+        if (leadSaved && lead.email) notificationSent = await notifyBrandPilot(lead, employee, messages);
+      }
     }
 
-    return NextResponse.json({ reply: text, leadSaved });
+    return NextResponse.json({ reply: text, leadSaved, notificationSent });
   } catch (err) {
     console.error("Chat route error:", err);
     return NextResponse.json({ error: "Sorry, something went wrong. Please try again." }, { status: 500 });
