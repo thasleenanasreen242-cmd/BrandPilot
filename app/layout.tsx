@@ -7,7 +7,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 const siteUrl = "https://www.brandpilotcloud.com";
-const title = "BrandPilot | AI-Powered Web Design & Digital Marketing Agency";
+const title = "BrandPilot | AI Web Design & Digital Marketing Agency";
 const description = "BrandPilot helps businesses grow with web design, SEO, branding, social media, paid ads, email marketing, and AI-powered digital marketing.";
 const socialImage = `${siteUrl}/logo.png`;
 const googleAnalyticsId = "G-V50C5F8D7V";
