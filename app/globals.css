@@ -98,6 +98,10 @@ a[href^="https://wa.me/"]{
   font-size:0;
 }
 
+a[href^="https://wa.me/"] > span{
+  display:none;
+}
+
 a[href^="https://wa.me/"]::before{
   content:"";
   display:block;
