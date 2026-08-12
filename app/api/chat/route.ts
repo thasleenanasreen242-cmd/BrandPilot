@@ -1,117 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const SYSTEM_PROMPT = `You are BrandPilot AI, a professional AI employee for BrandPilot, a digital marketing and web design agency.
-
-Act like a real BrandPilot team member. Help visitors, answer questions, understand their needs, and move genuine prospects toward the right next step.
-
-BrandPilot Services:
-- Website Design & Development
-- SEO & Content Strategy
-- Social Media Management
-- Paid Ads (PPC)
-- Email Marketing Automation
-- Branding & Identity
-
-Pricing:
-- Starter: $149 one-time (up to 5 pages)
-- Growth: $349 one-time (up to 10 pages, most popular)
-- Growth+: $99/month (ongoing SEO, social content, and email marketing)
-
-When a visitor shows buying intent, naturally qualify them. Collect the details you still need: name, email, business name, service needed, main goal, estimated budget, and expected starting timeline. Do not ask for every field at once unless appropriate.
-
-Rules:
-- Keep answers concise and conversational.
-- Give practical advice.
-- Never guarantee rankings, sales, or results.
-- Never create fake discounts or services.
-- Never pretend a lead was contacted or booked unless the application confirms it.`;
-
+const SYSTEM_PROMPT = `You are BrandPilot AI, a professional AI employee for BrandPilot, a digital marketing and web design agency. Act like a real BrandPilot team member. Help visitors, understand their needs, and move genuine prospects toward the right next step. Never guarantee results or claim an action happened unless confirmed.`;
 const EMPLOYEE_PROMPTS: Record<string, string> = {
-  sales: `You are BrandPilot Sales AI. Focus on lead qualification, sales questions, objections, follow-ups, and moving qualified prospects toward a BrandPilot call or enquiry. Identify buying intent and collect missing lead details naturally.`,
-  marketing: `You are BrandPilot Marketing AI. Focus on marketing strategy, campaigns, content planning, positioning, audience research, social media, and lead-generation ideas. When a visitor wants BrandPilot services, qualify the opportunity naturally.`,
-  seo: `You are BrandPilot SEO AI. Focus on SEO strategy, technical SEO, keywords, content opportunities, local SEO, and search visibility. When a visitor wants BrandPilot services, qualify the opportunity naturally.`,
+  sales: "You are BrandPilot Sales AI. Focus on qualification, objections, proposals, follow-ups and calls.",
+  marketing: "You are BrandPilot Marketing AI. Focus on strategy, campaigns, positioning, content and lead generation.",
+  seo: "You are BrandPilot SEO AI. Focus on technical SEO, keywords, content, local SEO and search visibility.",
+  social: "You are BrandPilot Social Media AI. Focus on Instagram content, Reels, captions, engagement and social strategy.",
 };
-
-const SOCIAL_MEDIA_PROMPT = `You are SocialPilot AI, BrandPilot's AI Social Media Manager. Help businesses with Instagram content calendars, Reel ideas, hooks, captions, hashtags, content planning, engagement, brand storytelling, and social growth. Understand business type, audience, platform, and goal. Do not guarantee viral results. When a visitor wants BrandPilot services, qualify the opportunity naturally.`;
-
 type ChatMessage = { role: "user" | "assistant"; content: string };
 type LeadData = { name?: string; email?: string; phone?: string; business_name?: string; service?: string; goal?: string; budget?: string; timeline?: string };
-
-function extractLeadData(messages: ChatMessage[]): LeadData {
-  const text = messages.filter((m) => m.role === "user").map((m) => m.content).join("\n");
-  const email = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
-  const phone = text.match(/(?:\+?\d[\d\s().-]{7,}\d)/)?.[0];
-  const budget = text.match(/(?:budget|spend|invest)\s*(?:is|:|around|of)?\s*([$€£₹]?\s?[\d,.]+\s?(?:k|K|per month|\/month)?)/i)?.[1];
-  const timeline = text.match(/(?:start|starting|timeline|launch)\s*(?:is|:|around|in|by)?\s*([^.!?\n]{2,50})/i)?.[1]?.trim();
-  return { email, phone, budget, timeline };
-}
-
-function isLeadIntent(messages: ChatMessage[]) {
-  const text = messages.filter((m) => m.role === "user").map((m) => m.content).join(" ").toLowerCase();
-  return /(hire|work with|interested|price|pricing|cost|quote|book|call|website|seo service|social media service|marketing service|need a website|start a project|proposal)/i.test(text);
-}
-
-function taskForEmployee(employee: string, lead: LeadData) {
-  const service = lead.service || "requested BrandPilot service";
-  if (employee === "sales") return { task_type: "sales_follow_up", title: `Follow up with ${lead.name || "new prospect"}`, description: `Review the qualified sales lead and move the ${service} opportunity toward a call or proposal.`, priority: "high" };
-  if (employee === "seo") return { task_type: "seo_review", title: `Review SEO opportunity for ${lead.business_name || "prospect"}`, description: `Prepare an initial SEO opportunity review based on the prospect's request.`, priority: "normal" };
-  if (employee === "social") return { task_type: "social_strategy", title: `Prepare social strategy for ${lead.business_name || "prospect"}`, description: `Review the prospect's social-media needs and prepare recommended next actions.`, priority: "normal" };
-  if (employee === "marketing") return { task_type: "marketing_plan", title: `Prepare marketing plan for ${lead.business_name || "prospect"}`, description: `Review the qualified marketing opportunity and prepare the recommended next step.`, priority: "normal" };
-  return { task_type: "lead_review", title: `Review new BrandPilot opportunity`, description: `Review the qualified website-chat lead and determine the best next action.`, priority: "normal" };
-}
-
-async function notifyBrandPilot(lead: LeadData, employee: string, conversation: ChatMessage[]) {
-  const endpoint = process.env.FORMSPREE_LEAD_ENDPOINT || "https://formspree.io/f/xdarbpol";
-  if (!lead.email) return false;
-  const transcript = conversation.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
-  try {
-    const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ _subject: `New qualified BrandPilot ${employee} lead`, name: lead.name || "Website visitor", email: lead.email, phone: lead.phone || "Not provided", business: lead.business_name || "Not provided", service: lead.service || "Not specified", goal: lead.goal || "Not provided", budget: lead.budget || "Not provided", timeline: lead.timeline || "Not provided", employee, conversation: transcript }) });
-    return response.ok;
-  } catch (error) { console.error("Lead email notification error:", error); return false; }
-}
-
-export async function POST(req: NextRequest) {
-  try {
-    const { messages, employee = "general" }: { messages: ChatMessage[]; employee?: string } = await req.json();
-    if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "Chat is not configured yet. Please contact us directly using the form below." }, { status: 500 });
-    const selectedPrompt = [SYSTEM_PROMPT, EMPLOYEE_PROMPTS[employee] || "", employee === "social" ? SOCIAL_MEDIA_PROMPT : ""].filter(Boolean).join("\n\n");
-    const contents = messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }));
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY }, body: JSON.stringify({ system_instruction: { parts: [{ text: selectedPrompt }] }, contents }) });
-    if (!response.ok) return NextResponse.json({ error: "Sorry, something went wrong. Please try again." }, { status: 500 });
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || "").join("") || "";
-    let leadSaved = false;
-    let notificationSent = false;
-    let followUpScheduled = false;
-    let taskCreated = false;
-
-    if (isLeadIntent(messages) && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      const lead = extractLeadData(messages);
-      const headers = { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json", Prefer: "return=representation" };
-      let existingLead = false;
-      if (lead.email) {
-        const lookup = await fetch(`${process.env.SUPABASE_URL}/rest/v1/ai_employee_leads?select=id&email=eq.${encodeURIComponent(lead.email)}&limit=1`, { headers, cache: "no-store" });
-        existingLead = lookup.ok && (await lookup.json()).length > 0;
-      }
-      if (!existingLead) {
-        const qualified = Boolean(lead.email);
-        const followUpAt = new Date(Date.now() + 86400000).toISOString();
-        const supabaseResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/ai_employee_leads`, { method: "POST", headers, body: JSON.stringify({ employee, ...lead, conversation: messages, source: "website_chat", status: "new", qualification_status: qualified ? "qualified" : "unqualified", lifecycle_status: qualified ? "qualified" : "new", booking_status: "not_booked", opted_out: false, follow_up_status: qualified ? "pending" : "not_due", follow_up_at: qualified ? followUpAt : null, follow_up_count: 0 }) });
-        const createdLeads = supabaseResponse.ok ? await supabaseResponse.json() : [];
-        leadSaved = supabaseResponse.ok;
-        followUpScheduled = leadSaved && qualified;
-        if (!supabaseResponse.ok) console.error("Lead save error:", await supabaseResponse.text());
-        if (leadSaved && lead.email) notificationSent = await notifyBrandPilot(lead, employee, messages);
-        if (leadSaved && qualified && createdLeads[0]?.id) {
-          const task = taskForEmployee(employee, lead);
-          const taskResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/ai_employee_tasks`, { method: "POST", headers, body: JSON.stringify({ lead_id: createdLeads[0].id, employee, ...task, status: "pending", due_at: new Date(Date.now() + 86400000).toISOString() }) });
-          taskCreated = taskResponse.ok;
-        }
-      }
-    }
-    return NextResponse.json({ reply: text, leadSaved, notificationSent, followUpScheduled, taskCreated });
-  } catch (err) {
-    console.error("Chat route error:", err);
-    return NextResponse.json({ error: "Sorry, something went wrong. Please try again." }, { status: 500 });
-  }
-}
+function extractLeadData(messages: ChatMessage[]): LeadData { const text = messages.filter(m => m.role === "user").map(m => m.content).join("\n"); return { email: text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0], phone: text.match(/(?:\+?\d[\d\s().-]{7,}\d)/)?.[0], budget: text.match(/(?:budget|spend|invest)\s*(?:is|:|around|of)?\s*([$€£₹]?\s?[\d,.]+\s?(?:k|K|per month|\/month)?)/i)?.[1], timeline: text.match(/(?:start|starting|timeline|launch)\s*(?:is|:|around|in|by)?\s*([^.!?\n]{2,50})/i)?.[1]?.trim() }; }
+function isLeadIntent(messages: ChatMessage[]) { return /(hire|work with|interested|price|pricing|cost|quote|book|call|website|seo service|social media service|marketing service|need a website|start a project|proposal)/i.test(messages.filter(m => m.role === "user").map(m => m.content).join(" ")); }
+function taskForEmployee(employee: string, lead: LeadData) { const business = lead.business_name || "prospect"; const service = lead.service || "requested BrandPilot service"; if (employee === "sales") return { task_type: "sales_follow_up", title: `Follow up with ${lead.name || "new prospect"}`, description: `Review the qualified ${service} opportunity for ${business} and move it toward a call or proposal.`, priority: "high" }; if (employee === "seo") return { task_type: "seo_review", title: `Prepare SEO review for ${business}`, description: `Review the prospect's SEO needs and prepare the recommended next action.`, priority: "normal" }; if (employee === "social") return { task_type: "social_strategy", title: `Prepare social strategy for ${business}`, description: `Review the prospect's social needs and prepare recommended content and growth actions.`, priority: "normal" }; if (employee === "marketing") return { task_type: "marketing_plan", title: `Prepare marketing plan for ${business}`, description: `Review the ${service} opportunity and prepare the recommended marketing next step.`, priority: "normal" }; return { task_type: "lead_review", title: `Review BrandPilot opportunity`, description: "Review the qualified website-chat lead and determine the best next action.", priority: "normal" }; }
+async function notifyBrandPilot(lead: LeadData, employee: string, conversation: ChatMessage[]) { const endpoint = process.env.FORMSPREE_LEAD_ENDPOINT || "https://formspree.io/f/xdarbpol"; if (!lead.email) return false; try { const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ _subject: `New qualified BrandPilot ${employee} lead`, name: lead.name || "Website visitor", email: lead.email, phone: lead.phone || "Not provided", business: lead.business_name || "Not provided", service: lead.service || "Not specified", goal: lead.goal || "Not provided", budget: lead.budget || "Not provided", timeline: lead.timeline || "Not provided", employee, conversation: conversation.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n") }) }); return response.ok; } catch { return false; } }
+export async function POST(req: NextRequest) { try { const { messages, employee = "general" }: { messages: ChatMessage[]; employee?: string } = await req.json(); if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "Chat is not configured yet." }, { status: 500 }); const prompt = `${SYSTEM_PROMPT}\n\n${EMPLOYEE_PROMPTS[employee] || "You are BrandPilot's general AI assistant."}`; const contents = messages.map(m => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })); const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent", { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY }, body: JSON.stringify({ system_instruction: { parts: [{ text: prompt }] }, contents }) }); if (!response.ok) return NextResponse.json({ error: "Sorry, something went wrong. Please try again." }, { status: 500 }); const data = await response.json(); const text = data.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || "").join("") || ""; let leadSaved = false, notificationSent = false, followUpScheduled = false, taskCreated = false; if (isLeadIntent(messages) && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) { const lead = extractLeadData(messages); const headers = { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`, "Content-Type": "application/json", Prefer: "return=representation" }; let existingLead = false; if (lead.email) { const lookup = await fetch(`${process.env.SUPABASE_URL}/rest/v1/ai_employee_leads?select=id&email=eq.${encodeURIComponent(lead.email)}&limit=1`, { headers, cache: "no-store" }); existingLead = lookup.ok && (await lookup.json()).length > 0; } if (!existingLead) { const qualified = Boolean(lead.email); const dueAt = new Date(Date.now() + 86400000).toISOString(); const leadResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/ai_employee_leads`, { method: "POST", headers, body: JSON.stringify({ employee, ...lead, conversation: messages, source: "website_chat", status: "new", qualification_status: qualified ? "qualified" : "unqualified", lifecycle_status: qualified ? "qualified" : "new", booking_status: "not_booked", opted_out: false, follow_up_status: qualified ? "pending" : "not_due", follow_up_at: qualified ? dueAt : null, follow_up_count: 0 }) }); const created = leadResponse.ok ? await leadResponse.json() : []; leadSaved = leadResponse.ok; followUpScheduled = leadSaved && qualified; if (leadSaved && lead.email) notificationSent = await notifyBrandPilot(lead, employee, messages); if (leadSaved && qualified && created[0]?.id) { const task = taskForEmployee(employee, lead); const taskResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/ai_employee_tasks`, { method: "POST", headers, body: JSON.stringify({ lead_id: created[0].id, employee, ...task, status: "pending", due_at: dueAt }) }); taskCreated = taskResponse.ok; } } } return NextResponse.json({ reply: text, leadSaved, notificationSent, followUpScheduled, taskCreated }); } catch (error) { console.error("Chat route error:", error); return NextResponse.json({ error: "Sorry, something went wrong." }, { status: 500 }); } }
