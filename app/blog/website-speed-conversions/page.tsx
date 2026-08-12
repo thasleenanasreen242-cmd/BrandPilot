@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Website Speed & Conversions | BrandPilot",
+  description: "Learn how website speed affects user experience, SEO, trust, and conversions, with practical steps for faster mobile-friendly pages.",
+  alternates: { canonical: "https://www.brandpilotcloud.com/blog/website-speed-conversions" },
+};
+
 export default function WebsiteSpeedArticle() {
   return (
     <ArticleLayout
@@ -74,9 +82,7 @@ function ArticleLayout({
           {children}
         </div>
         <div className="mt-14 pt-8 border-t border-white/10">
-          <a href="/#contact" className="inline-flex px-7 py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 font-bold hover:scale-105 transition">
-            Talk to BrandPilot →
-          </a>
+          <a href="/#contact" className="inline-flex px-7 py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 font-bold hover:scale-105 transition">Talk to BrandPilot →</a>
         </div>
       </article>
     </main>
