@@ -8,6 +8,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 const siteUrl = "https://www.brandpilotcloud.com";
 const title = "BrandPilot | Web Design & Digital Marketing Agency";
 const description = "BrandPilot helps businesses grow with web design, SEO, branding, social media, paid ads, email marketing, and AI-powered digital marketing.";
+const socialImage = `${siteUrl}/logo.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -35,13 +36,13 @@ export const metadata: Metadata = {
     siteName: "BrandPilot",
     type: "website",
     locale: "en_US",
-    images: [{ url: "/icon.png", width: 512, height: 512, alt: "BrandPilot digital marketing agency" }],
+    images: [{ url: socialImage, alt: "BrandPilot digital marketing agency logo" }],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: ["/icon.png"],
+    images: [socialImage],
   },
   robots: { index: true, follow: true },
 };
