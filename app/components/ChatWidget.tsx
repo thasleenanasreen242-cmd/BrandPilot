@@ -17,6 +17,18 @@ export default function ChatWidget() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, open]);
 
+  useEffect(() => {
+    const handleAssistantLabelClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      const label = target.closest("[data-ai-assistant-label]");
+      if (label) setOpen(true);
+    };
+
+    document.addEventListener("click", handleAssistantLabelClick);
+    return () => document.removeEventListener("click", handleAssistantLabelClick);
+  }, []);
+
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
     if (!input.trim() || loading) return;
@@ -60,7 +72,7 @@ export default function ChatWidget() {
               <p className="font-bold text-white">BrandPilot Assistant</p>
               <p className="text-xs text-gray-400">Ask about services & pricing</p>
             </div>
-            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white text-2xl leading-none">
+            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white text-2xl leading-none" aria-label="Close chat">
               ×
             </button>
           </div>
@@ -68,11 +80,7 @@ export default function ChatWidget() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm leading-relaxed ${
-                    m.role === "user" ? "bg-blue-500 text-white" : "bg-white/10 text-gray-200"
-                  }`}
-                >
+                <div className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm leading-relaxed ${m.role === "user" ? "bg-blue-500 text-white" : "bg-white/10 text-gray-200"}`}>
                   {m.content}
                 </div>
               </div>
@@ -91,11 +99,7 @@ export default function ChatWidget() {
               placeholder="Type your question..."
               className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-blue-400/50"
             />
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-4 rounded-xl font-semibold text-sm"
-            >
+            <button type="submit" disabled={loading} className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-4 rounded-xl font-semibold text-sm">
               Send
             </button>
           </form>
