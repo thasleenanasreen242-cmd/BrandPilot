@@ -21,8 +21,10 @@ export default function ChatWidget() {
     const handleAssistantLabelClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (!target) return;
-      const label = target.closest("[data-ai-assistant-label]");
-      if (label) setOpen(true);
+      const label = target.closest("p");
+      if (label?.textContent?.trim() === "AI Assistant · BrandPilot") {
+        setOpen(true);
+      }
     };
 
     document.addEventListener("click", handleAssistantLabelClick);
@@ -72,9 +74,7 @@ export default function ChatWidget() {
               <p className="font-bold text-white">BrandPilot Assistant</p>
               <p className="text-xs text-gray-400">Ask about services & pricing</p>
             </div>
-            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white text-2xl leading-none" aria-label="Close chat">
-              ×
-            </button>
+            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white text-2xl leading-none" aria-label="Close chat">×</button>
           </div>
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
@@ -85,32 +85,17 @@ export default function ChatWidget() {
                 </div>
               </div>
             ))}
-            {loading && (
-              <div className="flex justify-start">
-                <div className="bg-white/10 text-gray-400 px-4 py-2 rounded-2xl text-sm">Typing...</div>
-              </div>
-            )}
+            {loading && <div className="flex justify-start"><div className="bg-white/10 text-gray-400 px-4 py-2 rounded-2xl text-sm">Typing...</div></div>}
           </div>
 
           <form onSubmit={sendMessage} className="flex gap-2 p-3 border-t border-white/10">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your question..."
-              className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-blue-400/50"
-            />
-            <button type="submit" disabled={loading} className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-4 rounded-xl font-semibold text-sm">
-              Send
-            </button>
+            <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type your question..." className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-blue-400/50" />
+            <button type="submit" disabled={loading} className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white px-4 rounded-xl font-semibold text-sm">Send</button>
           </form>
         </div>
       )}
 
-      <button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-24 bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 transition text-xl"
-        aria-label="Open chat assistant"
-      >
+      <button onClick={() => setOpen(!open)} className="fixed bottom-6 right-24 bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 transition text-xl" aria-label="Open chat assistant">
         {open ? "×" : "🤖"}
       </button>
     </>
