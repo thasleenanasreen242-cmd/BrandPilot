@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "5 SEO Fixes for Small Businesses | BrandPilot",
+  description: "Learn five practical SEO fixes for small businesses, from search intent and title tags to internal links, technical SEO, and useful content.",
+  alternates: { canonical: "https://www.brandpilotcloud.com/blog/seo-tips-small-business" },
+};
+
 export default function SEOTipsArticle() {
   return (
     <ArticleLayout
