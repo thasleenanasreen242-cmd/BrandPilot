@@ -50,6 +50,45 @@ export default function ChatWidget() {
     };
   }, []);
 
+  // The homepage counter component can remain at its initial "0" when an
+  // IntersectionObserver misses the first intersection during hydration.
+  // This small fallback watches the four stats and guarantees they reach the
+  // intended values without changing the homepage markup or visual design.
+  useEffect(() => {
+    const stats = ["15+", "98%", "3.5x", "6+"];
+    const container = document.querySelector("main > section:nth-of-type(2) > div");
+    if (!container) return;
+
+    const counters = Array.from(container.querySelectorAll("p")).filter(
+      (node) => node.classList.contains("text-blue-400")
+    );
+    if (counters.length !== stats.length) return;
+
+    const timers = counters.map((node, index) => {
+      const target = stats[index];
+      const match = target.match(/[\d.]+/);
+      const number = match ? parseFloat(match[0]) : 0;
+      const suffix = target.replace(/[\d.]+/, "");
+      const start = performance.now();
+      const duration = 1200;
+
+      const tick = (now: number) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = number * eased;
+        const formatted = Number.isInteger(number)
+          ? Math.round(current).toString()
+          : current.toFixed(1);
+        node.textContent = formatted + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+
+      return requestAnimationFrame(tick);
+    });
+
+    return () => timers.forEach((timer) => cancelAnimationFrame(timer));
+  }, []);
+
   useEffect(() => {
     return () => {
       recognitionRef.current?.abort();
