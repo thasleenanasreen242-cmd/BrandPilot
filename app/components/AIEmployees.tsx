@@ -16,6 +16,8 @@ const aiEmployees = [
       "Competitor research",
     ],
     href: "/marketing-ai",
+    image: "/marketing-growth.svg",
+    alt: "Digital marketing growth dashboard showing traffic and conversion growth",
   },
   {
     icon: "🤝",
@@ -30,6 +32,8 @@ const aiEmployees = [
       "Booking assistance",
     ],
     href: "/sales-ai",
+    image: "/lead-conversion.svg",
+    alt: "Lead conversion funnel showing visitors becoming qualified leads and customers",
   },
   {
     icon: "🔍",
@@ -44,6 +48,8 @@ const aiEmployees = [
       "Ranking strategy",
     ],
     href: "/seo-ai",
+    image: "/seo-visibility.svg",
+    alt: "SEO search visibility visual representing keyword rankings and organic visibility",
   },
 ];
 
@@ -61,30 +67,42 @@ export default function AIEmployees() {
           {aiEmployees.map((employee) => (
             <div
               key={employee.name}
-              className="bg-white/5 border border-white/10 rounded-3xl p-8 hover:border-blue-400/50 transition"
+              className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden hover:border-blue-400/50 transition"
             >
-              <div className="text-5xl">{employee.icon}</div>
+              <img
+                src={employee.image}
+                alt={employee.alt}
+                width={800}
+                height={500}
+                loading="lazy"
+                decoding="async"
+                className="w-full aspect-[16/10] object-cover"
+              />
 
-              <h3 className="text-2xl font-bold mt-5">{employee.name}</h3>
+              <div className="p-8">
+                <div className="text-5xl">{employee.icon}</div>
 
-              <p className="text-blue-400 mt-2">{employee.role}</p>
+                <h3 className="text-2xl font-bold mt-5">{employee.name}</h3>
 
-              <p className="text-gray-400 mt-4 leading-7">{employee.description}</p>
+                <p className="text-blue-400 mt-2">{employee.role}</p>
 
-              <ul className="mt-6 space-y-3">
-                {employee.features.map((feature) => (
-                  <li key={feature} className="text-gray-300 text-sm">
-                    ✓ {feature}
-                  </li>
-                ))}
-              </ul>
+                <p className="text-gray-400 mt-4 leading-7">{employee.description}</p>
 
-              <Link
-                href={employee.href}
-                className="mt-8 block w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 transition font-bold text-center"
-              >
-                Explore {employee.name}
-              </Link>
+                <ul className="mt-6 space-y-3">
+                  {employee.features.map((feature) => (
+                    <li key={feature} className="text-gray-300 text-sm">
+                      ✓ {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href={employee.href}
+                  className="mt-8 block w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 transition font-bold text-center"
+                >
+                  Explore {employee.name}
+                </Link>
+              </div>
             </div>
           ))}
         </div>
