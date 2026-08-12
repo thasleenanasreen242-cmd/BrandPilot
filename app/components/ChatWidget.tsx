@@ -18,17 +18,24 @@ export default function ChatWidget() {
   }, [messages, open]);
 
   useEffect(() => {
+    const handleAssistantOpen = () => setOpen(true);
+
     const handleAssistantLabelClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (!target) return;
-      const label = target.closest("p");
+      const label = target.closest("button, p");
       if (label?.textContent?.trim() === "AI Assistant · BrandPilot") {
         setOpen(true);
       }
     };
 
+    document.addEventListener("brandpilot:open-chat", handleAssistantOpen);
     document.addEventListener("click", handleAssistantLabelClick);
-    return () => document.removeEventListener("click", handleAssistantLabelClick);
+
+    return () => {
+      document.removeEventListener("brandpilot:open-chat", handleAssistantOpen);
+      document.removeEventListener("click", handleAssistantLabelClick);
+    };
   }, []);
 
   async function sendMessage(e: React.FormEvent) {
