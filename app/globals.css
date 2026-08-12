@@ -103,3 +103,9 @@ body::after{
   transform:translateY(-12px);
   box-shadow:0 25px 60px rgba(37,99,235,.25);
 }
+
+/* BrandPilot header dot */
+nav a[aria-label="BrandPilot home"] span::after{
+  content:".";
+  color:#3B82F6;
+}
