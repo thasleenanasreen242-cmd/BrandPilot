@@ -34,6 +34,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             const replaceAvatar = () => {
               document.querySelectorAll('img[src="/avatar.svg"]').forEach((img) => {
                 if (img.dataset.avatarReplaced === "true") return;
+
+                const wrapper = document.createElement("div");
+                wrapper.style.position = "relative";
+                wrapper.style.width = "100%";
+                wrapper.style.height = "100%";
+                wrapper.style.borderRadius = "9999px";
+                wrapper.style.overflow = "hidden";
+
                 const video = document.createElement("video");
                 video.src = "/avatar.mp4";
                 video.autoplay = true;
@@ -42,8 +50,43 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 video.playsInline = true;
                 video.setAttribute("aria-label", "BrandPilot AI Assistant");
                 video.className = img.className;
+                video.style.cursor = "pointer";
                 video.dataset.avatarReplaced = "true";
-                img.replaceWith(video);
+
+                const muteButton = document.createElement("button");
+                muteButton.type = "button";
+                muteButton.textContent = "🔇 Muted";
+                muteButton.setAttribute("aria-label", "Toggle avatar sound");
+                Object.assign(muteButton.style, {
+                  position: "absolute",
+                  bottom: "8px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  zIndex: "5",
+                  padding: "5px 10px",
+                  borderRadius: "9999px",
+                  border: "1px solid rgba(255,255,255,.2)",
+                  background: "rgba(0,0,0,.6)",
+                  backdropFilter: "blur(8px)",
+                  color: "white",
+                  fontSize: "11px",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap"
+                });
+
+                muteButton.addEventListener("click", (event) => {
+                  event.stopPropagation();
+                  video.muted = !video.muted;
+                  if (!video.muted) {
+                    video.play().catch(() => {});
+                  }
+                  muteButton.textContent = video.muted ? "🔇 Muted" : "🔊 Sound on";
+                });
+
+                wrapper.appendChild(video);
+                wrapper.appendChild(muteButton);
+
+                img.replaceWith(wrapper);
               });
             };
             replaceAvatar();
