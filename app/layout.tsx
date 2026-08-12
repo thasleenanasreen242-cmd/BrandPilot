@@ -10,6 +10,7 @@ const siteUrl = "https://www.brandpilotcloud.com";
 const title = "BrandPilot | AI-Powered Web Design & Digital Marketing Agency";
 const description = "BrandPilot helps businesses grow with web design, SEO, branding, social media, paid ads, email marketing, and AI-powered digital marketing.";
 const socialImage = `${siteUrl}/logo.png`;
+const googleAnalyticsId = "G-NYJHRQPQXG";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -29,6 +30,19 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <BrandPilotStructuredData />
         {children}
+
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${googleAnalyticsId}', { anonymize_ip: true });
+            `,
+          }}
+        />
+
         <script dangerouslySetInnerHTML={{ __html: `
           (() => {
             const replaceAvatar = () => {
@@ -77,15 +91,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 muteButton.addEventListener("click", (event) => {
                   event.stopPropagation();
                   video.muted = !video.muted;
-                  if (!video.muted) {
-                    video.play().catch(() => {});
-                  }
+                  if (!video.muted) video.play().catch(() => {});
                   muteButton.textContent = video.muted ? "🔇 Muted" : "🔊 Sound on";
                 });
 
                 wrapper.appendChild(video);
                 wrapper.appendChild(muteButton);
-
                 img.replaceWith(wrapper);
               });
             };
