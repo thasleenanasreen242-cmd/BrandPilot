@@ -8,8 +8,8 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 const siteUrl = "https://www.brandpilotcloud.com";
-const title = "BrandPilot | AI Web Design & Digital Marketing Agency";
-const description = "BrandPilot helps businesses grow with web design, SEO, branding, social media, paid ads, email marketing, and AI-powered digital marketing.";
+const title = "Digital Marketing Agency in Kerala | SEO & Web Design | BrandPilot";
+const description = "BrandPilot is a digital marketing agency in Kerala, India offering SEO, local SEO, web design, technical SEO, social media, PPC and AI-powered marketing solutions.";
 const socialImage = `${siteUrl}/logo.png`;
 const googleAnalyticsId = "G-V50C5F8D7V";
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title,
   description,
-  keywords: ["digital marketing agency","web design agency","website development","SEO services","SEO agency","social media marketing","Google Ads","Meta Ads","email marketing","branding services","AI marketing"],
+  keywords: ["digital marketing agency Kerala","digital marketing agency Kozhikode","digital marketing agency India","SEO services Kerala","SEO agency Kerala","local SEO services Kozhikode","technical SEO services","on-page SEO","off-page SEO","web design Kerala","web development Kerala","social media marketing","Google Ads","Meta Ads","AI marketing"],
   alternates: { canonical: siteUrl },
   icons: { icon: "/icon.png", shortcut: "/icon.png", apple: "/icon.png" },
   openGraph: { title, description, url: siteUrl, siteName: "BrandPilot", type: "website", locale: "en_US", images: [{ url: socialImage, alt: "BrandPilot digital marketing agency logo" }] },
