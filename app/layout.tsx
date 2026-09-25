@@ -8,8 +8,8 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 const siteUrl = "https://www.brandpilotcloud.com";
-const title = "Digital Marketing Agency in Kerala | SEO & Web Design | BrandPilot";
-const description = "BrandPilot is a digital marketing agency in Kerala, India offering SEO, local SEO, web design, technical SEO, social media, PPC and AI-powered marketing solutions.";
+const title = "BrandPilot | Digital Marketing & SEO Agency in Kozhikode, Kerala";
+const description = "BrandPilot is a digital marketing and web development agency in Kozhikode, Kerala offering SEO, local SEO, websites, social media, Google Ads, branding and AI solutions.";
 const socialImage = `${siteUrl}/logo.png`;
 const googleAnalyticsId = "G-V50C5F8D7V";
 
@@ -17,11 +17,41 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title,
   description,
-  keywords: ["digital marketing agency Kerala","digital marketing agency Kozhikode","digital marketing agency India","SEO services Kerala","SEO agency Kerala","local SEO services Kozhikode","technical SEO services","on-page SEO","off-page SEO","web design Kerala","web development Kerala","social media marketing","Google Ads","Meta Ads","AI marketing"],
+  keywords: [
+    "digital marketing agency Kozhikode",
+    "digital marketing agency Kerala",
+    "SEO agency Kozhikode",
+    "SEO services Kerala",
+    "local SEO Kerala",
+    "local SEO services Kozhikode",
+    "digital marketing agency India",
+    "web development company Kozhikode",
+    "web design Kerala",
+    "technical SEO services",
+    "on-page SEO services",
+    "off-page SEO services",
+    "social media marketing Kerala",
+    "Google Ads agency Kerala",
+    "Meta Ads agency Kerala",
+    "AI solutions for businesses",
+  ],
   alternates: { canonical: siteUrl },
   icons: { icon: "/icon.png", shortcut: "/icon.png", apple: "/icon.png" },
-  openGraph: { title, description, url: siteUrl, siteName: "BrandPilot", type: "website", locale: "en_US", images: [{ url: socialImage, alt: "BrandPilot digital marketing agency logo" }] },
-  twitter: { card: "summary_large_image", title, description, images: [socialImage] },
+  openGraph: {
+    title,
+    description,
+    url: siteUrl,
+    siteName: "BrandPilot",
+    type: "website",
+    locale: "en_IN",
+    images: [{ url: socialImage, alt: "BrandPilot digital marketing and SEO agency" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: [socialImage],
+  },
   robots: { index: true, follow: true },
 };
 
