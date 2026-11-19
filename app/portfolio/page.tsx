@@ -135,6 +135,33 @@ export default function PortfolioPage() {
           </article>
         </div>
       </section>
+      <section className="relative z-10 px-6 pb-12">
+        <div className="max-w-6xl mx-auto">
+          <article className="overflow-hidden rounded-3xl border border-pink-400/25 bg-gradient-to-br from-pink-500/[0.10] via-white/[0.04] to-rose-500/[0.06]">
+            <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+              <div className="p-8 md:p-12">
+                <p className="text-xs uppercase tracking-[0.35em] text-pink-300 font-semibold">Upcoming Project · Beauty & Lifestyle</p>
+                <h2 className="text-4xl md:text-5xl font-black mt-4">Kiyomi Seoul</h2>
+                <p className="text-pink-200 font-medium mt-2">Beauty brand · Digital presence · Web experience</p>
+                <p className="text-gray-300 leading-8 mt-6">An upcoming digital project for Kiyomi Seoul, with a focus on presenting the brand through a polished and engaging online experience.</p>
+                <p className="text-gray-400 leading-7 mt-4">The project is currently in development. More details about the brand experience and its features will be added as the website progresses.</p>
+                <div className="flex flex-wrap gap-2 mt-6">
+                  {["Upcoming Launch","Beauty & Lifestyle","Brand Experience","Web Design"].map(tag=><span key={tag} className="text-xs px-3 py-1.5 rounded-full bg-pink-500/10 text-pink-200 border border-pink-400/20">{tag}</span>)}
+                </div>
+                <a href="https://kiyomi-seoul.vercel.app" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-8 px-7 py-3.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 font-bold hover:scale-105 transition">Preview project <span aria-hidden="true">↗</span></a>
+              </div>
+              <a href="https://kiyomi-seoul.vercel.app" target="_blank" rel="noopener noreferrer" className="min-h-[280px] lg:min-h-full bg-gradient-to-br from-slate-950 via-rose-950 to-black p-8 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-white/10">
+                <div className="text-sm tracking-[0.3em] text-pink-200 font-bold">KIYOMI SEOUL</div>
+                <div>
+                  <p className="text-3xl md:text-4xl font-black leading-tight">A fresh brand experience is <span className="text-pink-300">on its way.</span></p>
+                  <p className="text-sm text-gray-400 mt-4">A new digital destination is taking shape.</p>
+                </div>
+                <p className="text-xs uppercase tracking-widest text-pink-300">kiyomi-seoul.vercel.app ↗</p>
+              </a>
+            </div>
+          </article>
+        </div>
+      </section>
       <section className="relative z-10 px-6 pb-24"><div className="max-w-4xl mx-auto rounded-3xl border border-blue-400/20 bg-blue-500/[0.06] p-10 md:p-14 text-center"><p className="text-blue-400 text-sm uppercase tracking-[0.3em] font-semibold">Your brand next?</p><h2 className="text-4xl md:text-5xl font-black mt-4">Let&apos;s build something that gets noticed.</h2><p className="text-gray-400 mt-4 max-w-2xl mx-auto leading-7">Tell us what you&apos;re trying to achieve and we&apos;ll map out the clearest digital path forward.</p><a href="/#contact" className="inline-flex mt-8 px-8 py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 font-bold hover:scale-105 transition">Start Your Project →</a></div></section>
       <footer className="relative z-10 border-t border-white/10 py-8 px-6 text-center text-sm text-gray-500">© {new Date().getFullYear()} BrandPilot. All rights reserved.</footer>
     </main>
