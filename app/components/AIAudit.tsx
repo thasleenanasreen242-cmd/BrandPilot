@@ -4,9 +4,9 @@ export default function AIAudit() {
   return (
     <section id="ai-audit" className="py-24 px-6">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-5xl font-bold text-center">Free AI Website & SEO Audit</h2>
+        <h2 className="text-5xl font-bold text-center">Website &amp; Digital Growth Assessment</h2>
         <p className="text-gray-400 text-center mt-4 max-w-2xl mx-auto">
-          Find SEO, website performance, branding, and digital marketing opportunities that can help your business grow online.
+          Evaluate your website’s performance, search visibility, brand presence and digital marketing opportunities. Get actionable insights to strengthen your online presence and identify new opportunities for growth.
         </p>
 
         <div
