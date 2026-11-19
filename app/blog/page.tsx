@@ -14,6 +14,8 @@ const articles = [
     excerpt: "Five practical SEO improvements small businesses can make without needing a huge content budget.",
     date: "July 14, 2026",
     read: "5 min read",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=85",
+    imageAlt: "Digital analytics dashboard on a computer screen",
     accent: "from-emerald-500/70 to-teal-500/20",
   },
   {
@@ -23,6 +25,8 @@ const articles = [
     excerpt: "Speed affects user experience, trust and conversions. Here is what to check first when a site feels slow.",
     date: "July 8, 2026",
     read: "6 min read",
+    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=85",
+    imageAlt: "Laptop displaying a web development workspace",
     accent: "from-blue-500/70 to-indigo-500/20",
   },
   {
@@ -32,6 +36,8 @@ const articles = [
     excerpt: "A better social strategy starts with a clear audience, repeatable content pillars and a reason to act.",
     date: "July 2, 2026",
     read: "4 min read",
+    image: "https://images.unsplash.com/photo-1611162616475-46b635cb6868?auto=format&fit=crop&w=1200&q=85",
+    imageAlt: "Social media app icons on a digital screen",
     accent: "from-pink-500/70 to-rose-500/20",
   },
 ];
@@ -56,7 +62,7 @@ export default function BlogPage() {
         </div>
       </header>
       <section className="relative z-10 px-6 pt-24 pb-16"><div className="max-w-5xl mx-auto text-center"><p className="uppercase tracking-[0.4em] text-blue-400 text-xs font-semibold">BrandPilot Insights</p><h1 className="text-5xl md:text-7xl font-black mt-5">Ideas that help your<span className="text-blue-400"> brand grow.</span></h1><p className="text-gray-400 text-lg md:text-xl leading-8 max-w-2xl mx-auto mt-6">Practical insights on SEO, websites, social media, branding and AI-powered marketing — without the fluff.</p></div></section>
-      <section className="relative z-10 px-6 pb-24"><div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-7">{articles.map((article)=><a key={article.slug} href={`/blog/${article.slug}`} className="group rounded-3xl overflow-hidden border border-white/10 bg-white/[0.04] hover:border-blue-400/30 hover:-translate-y-1 transition-all"><div className={`h-2 bg-gradient-to-r ${article.accent}`} /><div className="h-44 bg-white/[0.02] p-6 flex items-end"><div><span className="text-xs uppercase tracking-widest text-blue-400 font-semibold">{article.category}</span><div className="mt-4 text-4xl font-black text-white/10 group-hover:text-blue-400/20 transition">BP</div></div></div><div className="p-7"><h2 className="text-xl font-bold leading-7 group-hover:text-blue-300 transition">{article.title}</h2><p className="text-gray-400 text-sm leading-7 mt-3">{article.excerpt}</p><p className="text-gray-500 text-xs mt-5">{article.read} · {article.date}</p><span className="inline-flex mt-6 text-sm font-semibold text-blue-300">Read article →</span></div></a>)}</div></section>
+      <section className="relative z-10 px-6 pb-24"><div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-7">{articles.map((article)=><a key={article.slug} href={`/blog/${article.slug}`} className="group rounded-3xl overflow-hidden border border-white/10 bg-white/[0.04] hover:border-blue-400/30 hover:-translate-y-1 transition-all"><div className={`h-2 bg-gradient-to-r ${article.accent}`} /><div className="relative h-52 overflow-hidden"><img src={article.image} alt={article.imageAlt} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" /><span className="absolute bottom-5 left-6 text-xs uppercase tracking-widest text-white font-semibold drop-shadow">{article.category}</span></div><div className="p-7"><h2 className="text-xl font-bold leading-7 group-hover:text-blue-300 transition">{article.title}</h2><p className="text-gray-400 text-sm leading-7 mt-3">{article.excerpt}</p><p className="text-gray-500 text-xs mt-5">{article.read} · {article.date}</p><span className="inline-flex mt-6 text-sm font-semibold text-blue-300">Read article →</span></div></a>)}</div></section>
       <footer className="relative z-10 border-t border-white/10 py-8 px-6 text-center text-sm text-gray-500">© {new Date().getFullYear()} BrandPilot. All rights reserved.</footer>
     </main>
   );
