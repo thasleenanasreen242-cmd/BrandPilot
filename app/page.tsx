@@ -55,8 +55,10 @@ export default function Home() {
           <p className="uppercase tracking-[0.35em] text-blue-400 text-sm font-semibold">Meet the Founder</p>
           <h2 className="text-4xl md:text-5xl font-black mt-4">Thasleena Nasreen T.</h2>
           <p className="text-blue-300 font-semibold mt-3">Founder &amp; Digital Strategist</p>
-          <p className="text-gray-400 text-lg leading-8 mt-6">Thasleena founded BrandPilot with a focus on helping businesses build a stronger digital presence. She brings together digital strategy, website development, branding and online marketing to create practical solutions that support business growth.</p>
-          <p className="text-gray-400 leading-8 mt-4">Her approach is simple: understand the business, identify what customers need, and use the right digital tools to turn that into meaningful progress.</p>
+          <p className="text-gray-400 text-lg leading-8 mt-6">Thasleena founded BrandPilot with a clear vision: to help businesses establish a strong digital presence and unlock new opportunities for growth.</p>
+          <p className="text-gray-400 leading-8 mt-4">With a focus on digital strategy, website development, branding and online marketing, she brings together creativity and technology to develop solutions aligned with each business&apos;s goals. Her approach combines an understanding of business needs with practical digital expertise to create meaningful, results-driven experiences.</p>
+          <p className="text-gray-400 leading-8 mt-4">At BrandPilot, every project begins with understanding the business, its audience and its objectives. From building a compelling online identity to strengthening digital visibility, the focus remains on creating purposeful solutions that support long-term growth.</p>
+          <p className="text-blue-200 font-semibold mt-6">Let&apos;s build your digital future together.</p>
           <a href="#contact" className="inline-flex items-center gap-2 mt-8 px-7 py-3.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 font-bold hover:scale-105 transition">Connect with BrandPilot <span aria-hidden="true">→</span></a>
         </div>
       </div>
