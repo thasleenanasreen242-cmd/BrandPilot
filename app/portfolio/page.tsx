@@ -54,6 +54,33 @@ export default function PortfolioPage() {
           </article>
         </div>
       </section>
+      <section className="relative z-10 px-6 pb-12">
+        <div className="max-w-6xl mx-auto">
+          <article className="overflow-hidden rounded-3xl border border-rose-400/25 bg-gradient-to-br from-rose-500/[0.10] via-white/[0.04] to-red-500/[0.06]">
+            <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+              <div className="p-8 md:p-12">
+                <p className="text-xs uppercase tracking-[0.35em] text-rose-300 font-semibold">Featured Project · Education</p>
+                <h2 className="text-4xl md:text-5xl font-black mt-4">MCT Students’ Union</h2>
+                <p className="text-rose-200 font-medium mt-2">Law college · Student community · Digital platform</p>
+                <p className="text-gray-300 leading-8 mt-6">A public-facing digital hub created for MCT Law College Students’ Union, bringing student-focused information, union updates and useful academic resources together in one accessible place.</p>
+                <p className="text-gray-400 leading-7 mt-4">Designed to make campus communication clearer and student resources easier to discover, the platform gives the union a modern online presence with a responsive experience for the college community.</p>
+                <div className="flex flex-wrap gap-2 mt-6">
+                  {["Student Platform","Education","UI/UX","Next.js"].map(tag=><span key={tag} className="text-xs px-3 py-1.5 rounded-full bg-rose-500/10 text-rose-200 border border-rose-400/20">{tag}</span>)}
+                </div>
+                <a href="https://mct-students-union.vercel.app" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-8 px-7 py-3.5 rounded-full bg-gradient-to-r from-rose-600 to-red-500 font-bold hover:scale-105 transition">Visit the website <span aria-hidden="true">↗</span></a>
+              </div>
+              <a href="https://mct-students-union.vercel.app" target="_blank" rel="noopener noreferrer" className="min-h-[280px] lg:min-h-full bg-gradient-to-br from-slate-950 via-rose-950 to-black p-8 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-white/10">
+                <div className="text-sm tracking-[0.25em] text-rose-200 font-bold">MCT · STUDENTS’ UNION</div>
+                <div>
+                  <p className="text-3xl md:text-4xl font-black leading-tight">A stronger campus community starts with <span className="text-rose-300">connection.</span></p>
+                  <p className="text-sm text-gray-400 mt-4">A digital home for student voices, information and connection.</p>
+                </div>
+                <p className="text-xs uppercase tracking-widest text-rose-300">mct-students-union.vercel.app ↗</p>
+              </a>
+            </div>
+          </article>
+        </div>
+      </section>
       <section className="relative z-10 px-6 pb-24"><div className="max-w-4xl mx-auto rounded-3xl border border-blue-400/20 bg-blue-500/[0.06] p-10 md:p-14 text-center"><p className="text-blue-400 text-sm uppercase tracking-[0.3em] font-semibold">Your brand next?</p><h2 className="text-4xl md:text-5xl font-black mt-4">Let&apos;s build something that gets noticed.</h2><p className="text-gray-400 mt-4 max-w-2xl mx-auto leading-7">Tell us what you&apos;re trying to achieve and we&apos;ll map out the clearest digital path forward.</p><a href="/#contact" className="inline-flex mt-8 px-8 py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 font-bold hover:scale-105 transition">Start Your Project →</a></div></section>
       <footer className="relative z-10 border-t border-white/10 py-8 px-6 text-center text-sm text-gray-500">© {new Date().getFullYear()} BrandPilot. All rights reserved.</footer>
     </main>
