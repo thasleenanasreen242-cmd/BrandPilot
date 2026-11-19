@@ -15,9 +15,9 @@ export default function AIAudit() {
         >
           <div>
             <span className="text-3xl" role="img" aria-label="Website analytics">📊</span>
-            <h3 className="text-3xl font-bold mt-4 mb-3">Free AI-Powered SEO & Marketing Audit</h3>
+            <h3 className="text-3xl font-bold mt-4 mb-3">Comprehensive SEO & Digital Marketing Analysis</h3>
             <p className="text-gray-400 leading-6">
-              Get an instant AI-generated health score for your website, SEO, brand, and digital marketing. Discover technical SEO issues, content opportunities, website performance improvements, and practical recommendations to strengthen your online presence.
+              Get a clear picture of your website’s digital health with an in-depth assessment of SEO, brand presence and marketing performance. Identify technical issues, uncover content opportunities, and discover practical ways to improve website performance, strengthen visibility and support sustainable business growth.
             </p>
 
             <ul className="mt-6 space-y-3">
