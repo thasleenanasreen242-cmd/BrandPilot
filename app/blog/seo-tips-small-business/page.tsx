@@ -77,6 +77,7 @@ function ArticleLayout({
         <p className="text-blue-400 text-xs uppercase tracking-[0.3em] font-semibold">{category}</p>
         <h1 className="text-4xl md:text-6xl font-black leading-tight mt-5">{title}</h1>
         <p className="text-gray-500 text-sm mt-5">{read} · {date}</p>
+        <div className="mt-8 overflow-hidden rounded-3xl border border-white/10"><img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=85" alt="Digital analytics dashboard representing search engine optimisation" className="w-full h-64 md:h-96 object-cover" fetchPriority="high" /></div>
         <div className="mt-12 space-y-7 text-gray-300 text-lg leading-9 [&_h2]:text-2xl [&_h2]:md:text-3xl [&_h2]:font-bold [&_h2]:text-white [&_h2]:pt-5">
           {children}
         </div>
